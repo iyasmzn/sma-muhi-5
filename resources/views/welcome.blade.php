@@ -15,6 +15,9 @@
     {{-- Alpine.js for mobile menu & slider --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+    {{-- AOS — Animate On Scroll (no SEO impact: content stays in DOM) --}}
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+
     <style>
         /* ── Filament design tokens ── */
         :root {
@@ -368,7 +371,8 @@
          STATIC CONTENT — QUICK LINKS
     ═══════════════════════════════════════════════════ --}}
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-2 pb-10">
-        <div class="fi-card p-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1">
+        <div class="fi-card p-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1"
+             data-aos="fade-up" data-aos-duration="500">
             @foreach([
                 ['📋', 'SPMB', '#spmb'],
                 ['📚', 'E-Learning', '#akademik'],
@@ -378,7 +382,8 @@
                 ['📞', 'Kontak', '#kontak'],
             ] as [$icon, $label, $href])
                 <a href="{{ $href }}"
-                   class="flex flex-col items-center gap-1.5 py-4 px-3 rounded-xl transition-colors hover:bg-amber-50 group">
+                   class="flex flex-col items-center gap-1.5 py-4 px-3 rounded-xl transition-colors hover:bg-amber-50 group"
+                   data-aos="fade-up" data-aos-delay="{{ $loop->index * 60 }}">
                     <span class="text-2xl">{{ $icon }}</span>
                     <span class="text-xs font-semibold group-hover:text-amber-700 transition-colors" style="color:var(--muted)">{{ $label }}</span>
                 </a>
@@ -391,11 +396,11 @@
         {{-- ═══════════════════════════════════════════════════
              CARD: CTA SPMB
         ═══════════════════════════════════════════════════ --}}
-        <section id="spmb" class="mb-6">
+        <section id="spmb" class="mb-6" data-aos="fade-up">
             <div class="rounded-2xl overflow-hidden border border-amber-200"
                  style="background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 60%,#fde68a 100%)">
                 <div class="grid lg:grid-cols-2 gap-0">
-                    <div class="p-8 lg:p-10">
+                    <div class="p-8 lg:p-10" data-aos="fade-right" data-aos-delay="100">
                         <div class="fi-badge mb-4">
                             <span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block animate-pulse"></span>
                             Penerimaan Peserta Didik Baru
@@ -418,7 +423,8 @@
                             </a>
                         </div>
                     </div>
-                    <div class="hidden lg:flex items-center justify-center bg-amber-400/20 p-10">
+                    <div class="hidden lg:flex items-center justify-center bg-amber-400/20 p-10"
+                         data-aos="fade-left" data-aos-delay="200">
                         <div class="text-center">
                             <div class="text-7xl mb-4">🎓</div>
                             <div class="grid grid-cols-3 gap-4 text-center">
@@ -446,7 +452,8 @@
                     ['👨‍🏫', 'Tenaga Pendidik','86',         'Guru bersertifikat'],
                     ['🏆', 'Prestasi',      '200+',       'Tingkat nasional'],
                 ] as [$icon, $label, $val, $sub])
-                    <div class="fi-card fi-card-hover p-5 text-center">
+                    <div class="fi-card fi-card-hover p-5 text-center"
+                         data-aos="zoom-in" data-aos-delay="{{ $loop->index * 80 }}">
                         <div class="text-3xl mb-2">{{ $icon }}</div>
                         <div class="text-xl font-extrabold text-amber-600">{{ $val }}</div>
                         <div class="text-xs font-semibold mt-0.5" style="color:var(--text)">{{ $label }}</div>
@@ -460,20 +467,20 @@
              SECTION: SAMBUTAN KEPALA SEKOLAH
         ═══════════════════════════════════════════════════ --}}
         <section id="sambutan" class="mb-12 border-t pt-12" style="border-color:var(--border)">
-            <div class="fi-label mb-2">Sambutan</div>
-            <h2 class="text-2xl font-bold mb-8" style="color:var(--text)">Sambutan Kepala Sekolah</h2>
+            <div class="fi-label mb-2" data-aos="fade-up">Sambutan</div>
+            <h2 class="text-2xl font-bold mb-8" style="color:var(--text)" data-aos="fade-up" data-aos-delay="50">Sambutan Kepala Sekolah</h2>
 
-            <div class="fi-card p-7 lg:p-10">
+            <div class="fi-card p-7 lg:p-10" data-aos="fade-up" data-aos-delay="100">
                 <div class="grid lg:grid-cols-3 gap-8 items-start">
                     {{-- Photo placeholder --}}
-                    <div class="flex flex-col items-center text-center">
+                    <div class="flex flex-col items-center text-center" data-aos="fade-right" data-aos-delay="150">
                         <div class="w-32 h-32 rounded-2xl bg-linear-to-br from-amber-400 to-amber-600 flex items-center justify-center text-5xl shadow-lg mb-4">👨‍💼</div>
                         <div class="font-bold text-sm" style="color:var(--text)">Drs. H. Ahmad Fauzi, M.Pd.</div>
                         <div class="text-xs mt-0.5" style="color:var(--muted)">Kepala Sekolah</div>
                         <div class="mt-3 fi-badge">NIP. 197003012005011001</div>
                     </div>
                     {{-- Message --}}
-                    <div class="lg:col-span-2">
+                    <div class="lg:col-span-2" data-aos="fade-left" data-aos-delay="150">
                         <svg class="w-8 h-8 text-amber-300 mb-4" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
                         </svg>
@@ -499,7 +506,7 @@
              SECTION: CTA SPMB (TAHAPAN)
         ═══════════════════════════════════════════════════ --}}
         <section class="mb-12 border-t pt-12" style="border-color:var(--border)">
-            <div class="text-center mb-10">
+            <div class="text-center mb-10" data-aos="fade-up">
                 <div class="fi-label mb-2">Cara Mendaftar</div>
                 <h2 class="text-2xl font-bold" style="color:var(--text)">Tahapan SPMB 2026/2027</h2>
                 <p class="mt-2 text-sm" style="color:var(--muted)">Ikuti langkah-langkah berikut untuk mendaftarkan diri sebagai calon peserta didik baru.</p>
@@ -512,7 +519,8 @@
                     ['03', '✅', 'Verifikasi', 'Berkas diverifikasi oleh panitia. Pantau status pendaftaran melalui akun Anda.'],
                     ['04', '🎉', 'Pengumuman', 'Hasil seleksi diumumkan pada tanggal 25 Juni 2026 melalui portal resmi sekolah.'],
                 ] as [$num, $icon, $title, $desc])
-                    <div class="fi-card fi-card-hover p-6 relative">
+                    <div class="fi-card fi-card-hover p-6 relative"
+                         data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
                         <div class="absolute top-4 right-4 text-3xl font-black text-amber-100 select-none">{{ $num }}</div>
                         <div class="text-2xl mb-3">{{ $icon }}</div>
                         <div class="font-bold text-sm mb-2" style="color:var(--text)">{{ $title }}</div>
@@ -535,7 +543,7 @@
              SECTION: KEGIATAN SEKOLAH
         ═══════════════════════════════════════════════════ --}}
         <section id="kegiatan" class="mb-12 border-t pt-12" style="border-color:var(--border)">
-            <div class="flex items-end justify-between gap-4 mb-8">
+            <div class="flex items-end justify-between gap-4 mb-8" data-aos="fade-up">
                 <div>
                     <div class="fi-label mb-2">Ekstrakurikuler & Acara</div>
                     <h2 class="text-2xl font-bold" style="color:var(--text)">Kegiatan Sekolah</h2>
@@ -562,7 +570,8 @@
                             'green'  => 'bg-green-50 text-green-700 border-green-200',
                         ][$color];
                     @endphp
-                    <div class="fi-card fi-card-hover p-5 flex gap-4">
+                    <div class="fi-card fi-card-hover p-5 flex gap-4"
+                         data-aos="fade-up" data-aos-delay="{{ ($loop->index % 3) * 100 }}">
                         <div class="text-3xl shrink-0">{{ $icon }}</div>
                         <div>
                             <div class="flex items-center gap-2 mb-1.5">
@@ -580,7 +589,7 @@
              SECTION: GALERI
         ═══════════════════════════════════════════════════ --}}
         <section id="galeri" class="mb-12 border-t pt-12" style="border-color:var(--border)">
-            <div class="flex items-end justify-between gap-4 mb-8">
+            <div class="flex items-end justify-between gap-4 mb-8" data-aos="fade-up">
                 <div>
                     <div class="fi-label mb-2">Foto & Video</div>
                     <h2 class="text-2xl font-bold" style="color:var(--text)">Galeri Sekolah</h2>
@@ -602,7 +611,8 @@
                     ['classroom',    'Ruang Kelas',        '210px'],
                     ['school-hall',  'Aula Sekolah',       '180px'],
                 ] as [$seed, $caption, $h])
-                    <div class="masonry-item group" style="height:{{ $h }}">
+                    <div class="masonry-item group" style="height:{{ $h }}"
+                         data-aos="fade-up" data-aos-delay="{{ ($loop->index % 3) * 80 }}" data-aos-duration="500">
                         {{-- Ganti src dengan URL media dari admin setelah upload --}}
                         <img src="https://picsum.photos/seed/{{ $seed }}/800/600"
                              alt="{{ $caption }}"
@@ -626,7 +636,7 @@
              SECTION: BLOG
         ═══════════════════════════════════════════════════ --}}
         <section id="blog" class="mb-12 border-t pt-12" style="border-color:var(--border)">
-            <div class="flex items-end justify-between gap-4 mb-8">
+            <div class="flex items-end justify-between gap-4 mb-8" data-aos="fade-up">
                 <div>
                     <div class="fi-label mb-2">Berita & Artikel</div>
                     <h2 class="text-2xl font-bold" style="color:var(--text)">Blog Sekolah</h2>
@@ -638,7 +648,7 @@
             </div>
 
             {{-- Featured post --}}
-            <article class="fi-card overflow-hidden mb-5">
+            <article class="fi-card overflow-hidden mb-5" data-aos="fade-up" data-aos-delay="50">
                 <div class="grid lg:grid-cols-5">
                     {{-- Ganti src dengan media dari admin --}}
                     <div class="lg:col-span-2 h-52 lg:h-auto relative overflow-hidden">
@@ -690,7 +700,8 @@
                             'purple' => ['bg-purple-50 text-purple-700 border-purple-200','text-purple-600'],
                         ][$color];
                     @endphp
-                    <article class="fi-card fi-card-hover group flex flex-col overflow-hidden">
+                    <article class="fi-card fi-card-hover group flex flex-col overflow-hidden"
+                             data-aos="fade-up" data-aos-delay="{{ ($loop->index % 3) * 100 }}">
                         {{-- Thumbnail — ganti src dengan media dari admin --}}
                         <div class="relative h-44 overflow-hidden">
                             <img src="https://picsum.photos/seed/{{ $seed }}/600/400"
@@ -731,7 +742,7 @@
             <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
 
                 {{-- Brand --}}
-                <div class="lg:col-span-1">
+                <div class="lg:col-span-1" data-aos="fade-up">
                     <div class="flex items-center gap-2.5 mb-4">
                         <div class="w-9 h-9 rounded-xl bg-amber-500 shadow flex items-center justify-center">
                             <span class="text-white font-extrabold text-base">{{ strtoupper(substr(config('app.name','S'),0,1)) }}</span>
@@ -751,7 +762,7 @@
                 </div>
 
                 {{-- Links --}}
-                <div>
+                <div data-aos="fade-up" data-aos-delay="100">
                     <div class="fi-label mb-3">Menu Utama</div>
                     <ul class="space-y-2">
                         @foreach(['Profil Sekolah','Visi & Misi','Struktur Organisasi','Tenaga Pendidik','Fasilitas'] as $l)
@@ -760,7 +771,7 @@
                     </ul>
                 </div>
 
-                <div>
+                <div data-aos="fade-up" data-aos-delay="200">
                     <div class="fi-label mb-3">Layanan</div>
                     <ul class="space-y-2">
                         @foreach(['SPMB Online','Portal Siswa','Portal Orang Tua','E-Learning','Jadwal Pelajaran'] as $l)
@@ -770,7 +781,7 @@
                 </div>
 
                 {{-- Contact --}}
-                <div>
+                <div data-aos="fade-up" data-aos-delay="300">
                     <div class="fi-label mb-3">Kontak</div>
                     <ul class="space-y-3 text-xs" style="color:var(--muted)">
                         <li class="flex gap-2"><span>📍</span><span>Jl. Pendidikan No. 1, Kec. Sukamaju, Kota Bandung 40111</span></li>
@@ -792,5 +803,15 @@
         </div>
     </footer>
 
+    {{-- AOS init --}}
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            once: true,
+            duration: 650,
+            easing: 'ease-out-quad',
+            offset: 50,
+        });
+    </script>
 </body>
 </html>

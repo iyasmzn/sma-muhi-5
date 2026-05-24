@@ -36,8 +36,8 @@
                 <span class="text-amber-600 font-medium">Blog</span>
             </nav>
 
-            <div class="fi-label mb-2">Blog & Berita</div>
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-amber-900 mb-2">
+            <div class="fi-label mb-2" data-aos="fade-up">Blog & Berita</div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-amber-900 mb-2" data-aos="fade-up" data-aos-delay="60">
                 {{ $category ? "Kategori: {$category}" : 'Semua Artikel' }}
             </h1>
             <p class="text-amber-800/70 text-sm max-w-xl">
@@ -76,7 +76,8 @@
         @else
             {{-- Featured (first post) --}}
             @php $featured = $posts->first(); @endphp
-            <article class="fi-card overflow-hidden mb-8 group" itemscope itemtype="https://schema.org/Article">
+            <article class="fi-card overflow-hidden mb-8 group" itemscope itemtype="https://schema.org/Article"
+                     data-aos="fade-up" data-aos-delay="50">
                 <meta itemprop="author" content="{{ $featured->author }}">
                 <meta itemprop="datePublished" content="{{ $featured->published_at?->toIso8601String() }}">
                 <div class="grid lg:grid-cols-5">
@@ -126,7 +127,8 @@
             <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach($posts->skip(1) as $post)
                     <article class="fi-card fi-card-hover group flex flex-col overflow-hidden"
-                             itemscope itemtype="https://schema.org/Article">
+                             itemscope itemtype="https://schema.org/Article"
+                             data-aos="fade-up" data-aos-delay="{{ ($loop->index % 3) * 100 }}">
                         <meta itemprop="author" content="{{ $post->author }}">
                         <meta itemprop="datePublished" content="{{ $post->published_at?->toIso8601String() }}">
 

@@ -74,7 +74,7 @@
     </div>
 
     {{-- ── Article Body ─────────────────────────────────────── --}}
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10" data-aos="fade-up" data-aos-duration="500">
         <div class="grid lg:grid-cols-4 gap-10">
 
             {{-- Main content --}}
@@ -180,7 +180,8 @@
 
                 <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach($related as $rel)
-                        <article class="fi-card fi-card-hover group flex flex-col overflow-hidden">
+                        <article class="fi-card fi-card-hover group flex flex-col overflow-hidden"
+                                 data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
                             <a href="{{ route('blog.show', $rel->slug) }}" class="relative h-40 block overflow-hidden">
                                 <img src="{{ $rel->thumbnail_url }}"
                                      alt="{{ $rel->title }}"

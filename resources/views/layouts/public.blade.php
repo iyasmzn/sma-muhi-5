@@ -51,6 +51,7 @@
     @endif
 
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
 
     <style>
         :root {
@@ -141,5 +142,7 @@
         </div>
     </footer>
 
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script>AOS.init({ once: true, duration: 650, easing: 'ease-out-quad', offset: 50 });</script>
 </body>
 </html>
