@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Stat;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -15,6 +16,8 @@ class HomeController extends Controller
             ->limit(7)
             ->get();
 
-        return view('welcome', compact('posts'));
+        $stats = Stat::ordered()->get();
+
+        return view('welcome', compact('posts', 'stats'));
     }
 }
