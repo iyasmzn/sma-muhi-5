@@ -15,7 +15,7 @@
     'author'        => ['@type' => 'Person', 'name' => $post->author],
     'publisher'     => [
         '@type' => 'EducationalOrganization',
-        'name'  => config('app.name'),
+        'name'  => setting('site_name', config('app.name')),
         'url'   => url('/'),
     ],
     'articleSection' => $post->category,

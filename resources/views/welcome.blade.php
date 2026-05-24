@@ -3,8 +3,15 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'SMA Negeri') }} — Unggul, Berkarakter, Berprestasi</title>
-    <meta name="description" content="Website resmi {{ config('app.name') }}. Informasi SPMB, akademik, kegiatan, dan berita sekolah.">
+    <title>{{ setting('site_name', config('app.name', 'SMA Negeri')) }} — {{ setting('site_tagline', 'Unggul, Berkarakter, Berprestasi') }}</title>
+    <meta name="description" content="{{ setting('site_description', 'Website resmi ' . setting('site_name', config('app.name')) . '. Informasi SPMB, akademik, kegiatan, dan berita sekolah.') }}">
+
+    {{-- ── Favicon ─────────────────────────────────────────── --}}
+    @if(setting('site_favicon'))
+        <link rel="icon" href="{{ asset('storage/' . setting('site_favicon')) }}">
+    @else
+        <link rel="icon" href="/favicon.ico">
+    @endif
 
     @fonts
 
@@ -104,7 +111,7 @@
           slides: [
               { title: 'Unggul dalam Akademik',      sub: 'Raih prestasi terbaik bersama guru-guru berpengalaman dan fasilitas modern.',       img: 'https://picsum.photos/seed/hero-school1/1600/900' },
               { title: 'Berkarakter & Berintegritas', sub: 'Membentuk generasi beriman, bertakwa, dan berakhlak mulia untuk bangsa.',           img: 'https://picsum.photos/seed/hero-school2/1600/900' },
-              { title: 'Buka Pendaftaran 2026/2027',  sub: 'SPMB resmi dibuka. Daftarkan putra-putri Anda sekarang sebelum batas waktu.',      img: 'https://picsum.photos/seed/hero-school3/1600/900' },
+              { title: 'Buka Pendaftaran {{ setting('spmb_year', '2026/2027') }}',  sub: 'SPMB resmi dibuka. Daftarkan putra-putri Anda sekarang sebelum batas waktu.',      img: 'https://picsum.photos/seed/hero-school3/1600/900' },
           ]
       }"
       x-init="
@@ -129,17 +136,23 @@
 
                 {{-- Logo --}}
                 <a href="/" class="flex items-center gap-2.5 shrink-0 min-w-0">
-                    <div class="w-9 h-9 shrink-0 rounded-xl bg-amber-500 shadow flex items-center justify-center">
-                        <span class="text-white font-extrabold text-base">{{ strtoupper(substr(config('app.name','S'),0,1)) }}</span>
-                    </div>
+                    @if(setting('site_logo'))
+                        <img src="{{ asset('storage/' . setting('site_logo')) }}"
+                             alt="{{ setting('site_name', config('app.name')) }}"
+                             class="w-9 h-9 rounded-xl object-contain shrink-0">
+                    @else
+                        <div class="w-9 h-9 shrink-0 rounded-xl bg-amber-500 shadow flex items-center justify-center">
+                            <span class="text-white font-extrabold text-base">{{ strtoupper(substr(setting('site_name', config('app.name', 'S')), 0, 1)) }}</span>
+                        </div>
+                    @endif
                     <div class="leading-tight min-w-0">
                         <div class="font-bold text-sm truncate transition-colors duration-300"
                              :class="scrolled ? 'text-gray-900' : 'text-white'">
-                            {{ config('app.name', 'SMA Negeri 1') }}
+                            {{ setting('site_name', config('app.name', 'SMA Negeri 1')) }}
                         </div>
                         <div class="text-[10px] font-medium uppercase tracking-widest transition-colors duration-300"
                              :class="scrolled ? 'text-amber-600' : 'text-amber-300'">
-                            Unggul · Berkarakter
+                            {{ setting('site_tagline', 'Unggul · Berkarakter') }}
                         </div>
                     </div>
                 </a>
@@ -224,12 +237,18 @@
         {{-- Top bar: logo + close --}}
         <div class="flex items-center justify-between px-6 py-4 border-b border-white/10 shrink-0">
             <a href="/" @click="mobileOpen = false" class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center shadow-lg">
-                    <span class="text-white font-extrabold text-base">{{ strtoupper(substr(config('app.name','S'),0,1)) }}</span>
-                </div>
+                @if(setting('site_logo'))
+                    <img src="{{ asset('storage/' . setting('site_logo')) }}"
+                         alt="{{ setting('site_name', config('app.name')) }}"
+                         class="w-10 h-10 rounded-xl object-contain">
+                @else
+                    <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center shadow-lg">
+                        <span class="text-white font-extrabold text-base">{{ strtoupper(substr(setting('site_name', config('app.name', 'S')), 0, 1)) }}</span>
+                    </div>
+                @endif
                 <div>
-                    <div class="font-bold text-white text-sm">{{ config('app.name', 'SMA Negeri 1') }}</div>
-                    <div class="text-[10px] font-semibold uppercase tracking-widest text-amber-400">Unggul · Berkarakter</div>
+                    <div class="font-bold text-white text-sm">{{ setting('site_name', config('app.name', 'SMA Negeri 1')) }}</div>
+                    <div class="text-[10px] font-semibold uppercase tracking-widest text-amber-400">{{ setting('site_tagline', 'Unggul · Berkarakter') }}</div>
                 </div>
             </a>
 
@@ -291,7 +310,7 @@
             @endif
 
             {{-- Tagline --}}
-            <p class="text-center text-xs text-white/30 pt-1">© {{ date('Y') }} {{ config('app.name') }}</p>
+            <p class="text-center text-xs text-white/30 pt-1">© {{ date('Y') }} {{ setting('site_name', config('app.name')) }}</p>
         </div>
     </div>
 
@@ -406,7 +425,7 @@
                             Penerimaan Peserta Didik Baru
                         </div>
                         <h2 class="text-2xl sm:text-3xl font-extrabold text-amber-900 leading-snug mb-3">
-                            SPMB Tahun Ajaran<br>2026 / 2027 Dibuka!
+                            SPMB Tahun Ajaran<br>{{ setting('spmb_year', '2026/2027') }} Dibuka!
                         </h2>
                         <p class="text-amber-800/80 text-sm leading-relaxed mb-6">
                             Pendaftaran peserta didik baru resmi dibuka. Tersedia jalur Prestasi, Zonasi, dan Afirmasi. Segera lengkapi berkas dan daftarkan diri Anda sebelum batas waktu.
@@ -428,7 +447,11 @@
                         <div class="text-center">
                             <div class="text-7xl mb-4">🎓</div>
                             <div class="grid grid-cols-3 gap-4 text-center">
-                                @foreach([['30 Mei','Batas Daftar'],['10 Jun','Seleksi'],['25 Jun','Pengumuman']] as [$d,$l])
+                                @foreach([
+                                    [setting('spmb_deadline', '30 Mei'), 'Batas Daftar'],
+                                    [setting('spmb_select', '10 Juni'), 'Seleksi'],
+                                    [setting('spmb_announce', '25 Juni'), 'Pengumuman'],
+                                ] as [$d, $l])
                                     <div class="bg-white/70 rounded-xl p-3">
                                         <div class="text-sm font-extrabold text-amber-700">{{ $d }}</div>
                                         <div class="text-[10px] text-amber-600 font-medium mt-0.5">{{ $l }}</div>
@@ -485,13 +508,13 @@
                             <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
                         </svg>
                         <p class="text-sm leading-relaxed mb-4" style="color:var(--muted)">
-                            Assalamu'alaikum Warahmatullahi Wabarakatuh. Puji syukur kepada Allah SWT atas segala nikmat dan karunia-Nya sehingga {{ config('app.name') }} terus berkembang menjadi lembaga pendidikan yang unggul dan terpercaya.
+                            Assalamu'alaikum Warahmatullahi Wabarakatuh. Puji syukur kepada Allah SWT atas segala nikmat dan karunia-Nya sehingga {{ setting('site_name', config('app.name')) }} terus berkembang menjadi lembaga pendidikan yang unggul dan terpercaya.
                         </p>
                         <p class="text-sm leading-relaxed mb-4" style="color:var(--muted)">
                             Kami berkomitmen untuk memberikan pendidikan berkualitas tinggi yang tidak hanya mencerdaskan akal, tetapi juga membentuk karakter mulia. Dengan dukungan tenaga pendidik profesional dan fasilitas modern, kami yakin setiap siswa dapat meraih potensi terbaiknya.
                         </p>
                         <p class="text-sm leading-relaxed" style="color:var(--muted)">
-                            Selamat datang dan bergabunglah bersama keluarga besar {{ config('app.name') }}. Mari bersama-sama kita wujudkan generasi penerus bangsa yang cerdas, berkarakter, dan berakhlak mulia.
+                            Selamat datang dan bergabunglah bersama keluarga besar {{ setting('site_name', config('app.name')) }}. Mari bersama-sama kita wujudkan generasi penerus bangsa yang cerdas, berkarakter, dan berakhlak mulia.
                         </p>
                         <div class="mt-6 pt-5 border-t flex items-center gap-3" style="border-color:var(--border)">
                             <div class="text-xs" style="color:var(--muted)">Wassalamu'alaikum Wr. Wb.</div>
@@ -508,7 +531,7 @@
         <section class="mb-12 border-t pt-12" style="border-color:var(--border)">
             <div class="text-center mb-10" data-aos="fade-up">
                 <div class="fi-label mb-2">Cara Mendaftar</div>
-                <h2 class="text-2xl font-bold" style="color:var(--text)">Tahapan SPMB 2026/2027</h2>
+                <h2 class="text-2xl font-bold" style="color:var(--text)">Tahapan SPMB {{ setting('spmb_year', '2026/2027') }}</h2>
                 <p class="mt-2 text-sm" style="color:var(--muted)">Ikuti langkah-langkah berikut untuk mendaftarkan diri sebagai calon peserta didik baru.</p>
             </div>
 
@@ -517,7 +540,7 @@
                     ['01', '📝', 'Isi Formulir', 'Isi formulir pendaftaran online secara lengkap dan benar melalui portal SPMB.'],
                     ['02', '📁', 'Upload Berkas', 'Upload dokumen yang dipersyaratkan: ijazah/SHUN, rapor, dan pas foto terbaru.'],
                     ['03', '✅', 'Verifikasi', 'Berkas diverifikasi oleh panitia. Pantau status pendaftaran melalui akun Anda.'],
-                    ['04', '🎉', 'Pengumuman', 'Hasil seleksi diumumkan pada tanggal 25 Juni 2026 melalui portal resmi sekolah.'],
+                    ['04', '🎉', 'Pengumuman', 'Hasil seleksi diumumkan pada tanggal ' . setting('spmb_announce', '25 Juni') . ' melalui portal resmi sekolah.'],
                 ] as [$num, $icon, $title, $desc])
                     <div class="fi-card fi-card-hover p-6 relative"
                          data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
@@ -742,20 +765,42 @@
                 {{-- Brand --}}
                 <div class="lg:col-span-1" data-aos="fade-up">
                     <div class="flex items-center gap-2.5 mb-4">
-                        <div class="w-9 h-9 rounded-xl bg-amber-500 shadow flex items-center justify-center">
-                            <span class="text-white font-extrabold text-base">{{ strtoupper(substr(config('app.name','S'),0,1)) }}</span>
-                        </div>
+                        @if(setting('site_logo'))
+                            <img src="{{ asset('storage/' . setting('site_logo')) }}"
+                                 alt="{{ setting('site_name', config('app.name')) }}"
+                                 class="w-9 h-9 rounded-xl object-contain">
+                        @else
+                            <div class="w-9 h-9 rounded-xl bg-amber-500 shadow flex items-center justify-center">
+                                <span class="text-white font-extrabold text-base">{{ strtoupper(substr(setting('site_name', config('app.name', 'S')), 0, 1)) }}</span>
+                            </div>
+                        @endif
                         <div>
-                            <div class="font-bold text-sm" style="color:var(--text)">{{ config('app.name', 'SMA Negeri 1') }}</div>
-                            <div class="text-[10px] text-amber-600 font-semibold uppercase tracking-wider">Unggul · Berkarakter</div>
+                            <div class="font-bold text-sm" style="color:var(--text)">{{ setting('site_name', config('app.name', 'SMA Negeri 1')) }}</div>
+                            <div class="text-[10px] text-amber-600 font-semibold uppercase tracking-wider">{{ setting('site_tagline', 'Unggul · Berkarakter') }}</div>
                         </div>
                     </div>
                     <p class="text-xs leading-relaxed mb-4" style="color:var(--muted)">Mencetak generasi penerus bangsa yang cerdas, berkarakter mulia, dan siap menghadapi tantangan masa depan.</p>
                     <div class="flex gap-2">
-                        @foreach(['FB','IG','YT','WA'] as $s)
-                            <a href="#" class="w-8 h-8 rounded-xl border flex items-center justify-center text-[10px] font-bold transition-all hover:bg-amber-50 hover:border-amber-300 hover:text-amber-600"
-                               style="border-color:var(--border); color:var(--muted)">{{ $s }}</a>
-                        @endforeach
+                        @if(setting('social_facebook'))
+                            <a href="{{ setting('social_facebook') }}" target="_blank" rel="noopener"
+                               class="w-8 h-8 rounded-xl border flex items-center justify-center text-[10px] font-bold transition-all hover:bg-amber-50 hover:border-amber-300 hover:text-amber-600"
+                               style="border-color:var(--border); color:var(--muted)">FB</a>
+                        @endif
+                        @if(setting('social_instagram'))
+                            <a href="{{ setting('social_instagram') }}" target="_blank" rel="noopener"
+                               class="w-8 h-8 rounded-xl border flex items-center justify-center text-[10px] font-bold transition-all hover:bg-amber-50 hover:border-amber-300 hover:text-amber-600"
+                               style="border-color:var(--border); color:var(--muted)">IG</a>
+                        @endif
+                        @if(setting('social_youtube'))
+                            <a href="{{ setting('social_youtube') }}" target="_blank" rel="noopener"
+                               class="w-8 h-8 rounded-xl border flex items-center justify-center text-[10px] font-bold transition-all hover:bg-amber-50 hover:border-amber-300 hover:text-amber-600"
+                               style="border-color:var(--border); color:var(--muted)">YT</a>
+                        @endif
+                        @if(setting('social_whatsapp'))
+                            <a href="https://wa.me/{{ setting('social_whatsapp') }}" target="_blank" rel="noopener"
+                               class="w-8 h-8 rounded-xl border flex items-center justify-center text-[10px] font-bold transition-all hover:bg-amber-50 hover:border-amber-300 hover:text-amber-600"
+                               style="border-color:var(--border); color:var(--muted)">WA</a>
+                        @endif
                     </div>
                 </div>
 
@@ -782,16 +827,24 @@
                 <div data-aos="fade-up" data-aos-delay="300">
                     <div class="fi-label mb-3">Kontak</div>
                     <ul class="space-y-3 text-xs" style="color:var(--muted)">
-                        <li class="flex gap-2"><span>📍</span><span>Jl. Pendidikan No. 1, Kec. Sukamaju, Kota Bandung 40111</span></li>
-                        <li class="flex gap-2"><span>📞</span><span>(022) 1234-5678</span></li>
-                        <li class="flex gap-2"><span>✉️</span><span>info@sman1.sch.id</span></li>
-                        <li class="flex gap-2"><span>🕐</span><span>Senin–Jumat, 07.00–15.30 WIB</span></li>
+                        @if(setting('contact_address'))
+                            <li class="flex gap-2"><span>📍</span><span>{{ setting('contact_address') }}</span></li>
+                        @endif
+                        @if(setting('contact_phone'))
+                            <li class="flex gap-2"><span>📞</span><span>{{ setting('contact_phone') }}</span></li>
+                        @endif
+                        @if(setting('contact_email'))
+                            <li class="flex gap-2"><span>✉️</span><span>{{ setting('contact_email') }}</span></li>
+                        @endif
+                        @if(setting('contact_hours'))
+                            <li class="flex gap-2"><span>🕐</span><span>{{ setting('contact_hours') }}</span></li>
+                        @endif
                     </ul>
                 </div>
             </div>
 
             <div class="mt-10 pt-6 border-t flex flex-col sm:flex-row items-center justify-between gap-3" style="border-color:var(--border)">
-                <span class="text-xs" style="color:var(--muted)">© {{ date('Y') }} {{ config('app.name','SMA Negeri 1') }}. Hak cipta dilindungi.</span>
+                <span class="text-xs" style="color:var(--muted)">© {{ date('Y') }} {{ setting('site_name', config('app.name', 'SMA Negeri 1')) }}. Hak cipta dilindungi.</span>
                 <div class="flex gap-4">
                     @foreach(['Kebijakan Privasi','Syarat & Ketentuan','Aksesibilitas'] as $l)
                         <a href="#" class="text-xs hover:text-amber-600 transition-colors" style="color:var(--muted)">{{ $l }}</a>

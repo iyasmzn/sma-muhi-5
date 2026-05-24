@@ -5,22 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     {{-- ── Core SEO ────────────────────────────────────────── --}}
-    <title>{{ $seo['title'] ?? config('app.name') }}</title>
+    <title>{{ $seo['title'] ?? setting('site_name', config('app.name')) }}</title>
     <meta name="description" content="{{ $seo['description'] ?? '' }}">
     <link rel="canonical" href="{{ $seo['canonical'] ?? url()->current() }}">
     <meta name="robots" content="{{ $seo['robots'] ?? 'index, follow' }}">
 
+    {{-- ── Favicon ─────────────────────────────────────────── --}}
+    @if(setting('site_favicon'))
+        <link rel="icon" href="{{ asset('storage/' . setting('site_favicon')) }}">
+    @else
+        <link rel="icon" href="/favicon.ico">
+    @endif
+
     {{-- ── Open Graph ──────────────────────────────────────── --}}
     <meta property="og:type"        content="{{ $seo['og_type'] ?? 'website' }}">
-    <meta property="og:title"       content="{{ $seo['title'] ?? config('app.name') }}">
+    <meta property="og:title"       content="{{ $seo['title'] ?? setting('site_name', config('app.name')) }}">
     <meta property="og:description" content="{{ $seo['description'] ?? '' }}">
     <meta property="og:url"         content="{{ $seo['canonical'] ?? url()->current() }}">
-    <meta property="og:site_name"   content="{{ config('app.name') }}">
+    <meta property="og:site_name"   content="{{ setting('site_name', config('app.name')) }}">
     @if(!empty($seo['og_image']))
         <meta property="og:image"       content="{{ $seo['og_image'] }}">
         <meta property="og:image:width" content="1200">
         <meta property="og:image:height"content="630">
-        <meta property="og:image:alt"   content="{{ $seo['title'] ?? config('app.name') }}">
+        <meta property="og:image:alt"   content="{{ $seo['title'] ?? setting('site_name', config('app.name')) }}">
     @endif
     @if(!empty($seo['published']))
         <meta property="article:published_time" content="{{ $seo['published'] }}">
@@ -34,7 +41,7 @@
 
     {{-- ── Twitter Card ────────────────────────────────────── --}}
     <meta name="twitter:card"        content="summary_large_image">
-    <meta name="twitter:title"       content="{{ $seo['title'] ?? config('app.name') }}">
+    <meta name="twitter:title"       content="{{ $seo['title'] ?? setting('site_name', config('app.name')) }}">
     <meta name="twitter:description" content="{{ $seo['description'] ?? '' }}">
     @if(!empty($seo['og_image']))
         <meta name="twitter:image" content="{{ $seo['og_image'] }}">
@@ -90,12 +97,18 @@
         <div class="amber-bar"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
             <a href="/" class="flex items-center gap-2.5 shrink-0">
-                <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center shadow-sm">
-                    <span class="text-white font-bold text-sm">{{ strtoupper(substr(config('app.name','S'),0,1)) }}</span>
-                </div>
+                @if(setting('site_logo'))
+                    <img src="{{ asset('storage/' . setting('site_logo')) }}"
+                         alt="{{ setting('site_name', config('app.name')) }}"
+                         class="w-8 h-8 rounded-lg object-contain">
+                @else
+                    <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center shadow-sm">
+                        <span class="text-white font-bold text-sm">{{ strtoupper(substr(setting('site_name', config('app.name', 'S')), 0, 1)) }}</span>
+                    </div>
+                @endif
                 <div class="hidden sm:block leading-tight">
-                    <div class="font-bold text-sm" style="color:var(--text)">{{ config('app.name') }}</div>
-                    <div class="text-[10px] text-amber-600 font-semibold uppercase tracking-wider">Unggul · Berkarakter</div>
+                    <div class="font-bold text-sm" style="color:var(--text)">{{ setting('site_name', config('app.name')) }}</div>
+                    <div class="text-[10px] text-amber-600 font-semibold uppercase tracking-wider">{{ setting('site_tagline', 'Unggul · Berkarakter') }}</div>
                 </div>
             </a>
 
@@ -128,12 +141,18 @@
         <div class="amber-bar"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="flex items-center gap-2.5">
-                <div class="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center">
-                    <span class="text-white font-bold text-xs">{{ strtoupper(substr(config('app.name','S'),0,1)) }}</span>
-                </div>
-                <span class="text-sm font-semibold" style="color:var(--text)">{{ config('app.name') }}</span>
+                @if(setting('site_logo'))
+                    <img src="{{ asset('storage/' . setting('site_logo')) }}"
+                         alt="{{ setting('site_name', config('app.name')) }}"
+                         class="w-7 h-7 rounded-lg object-contain">
+                @else
+                    <div class="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center">
+                        <span class="text-white font-bold text-xs">{{ strtoupper(substr(setting('site_name', config('app.name', 'S')), 0, 1)) }}</span>
+                    </div>
+                @endif
+                <span class="text-sm font-semibold" style="color:var(--text)">{{ setting('site_name', config('app.name')) }}</span>
             </div>
-            <p class="text-xs" style="color:var(--muted)">© {{ date('Y') }} {{ config('app.name') }}. Semua hak dilindungi.</p>
+            <p class="text-xs" style="color:var(--muted)">© {{ date('Y') }} {{ setting('site_name', config('app.name')) }}. Semua hak dilindungi.</p>
             <nav class="flex gap-4">
                 <a href="/" class="text-xs hover:text-amber-600 transition-colors" style="color:var(--muted)">Beranda</a>
                 <a href="/blog" class="text-xs hover:text-amber-600 transition-colors" style="color:var(--muted)">Blog</a>

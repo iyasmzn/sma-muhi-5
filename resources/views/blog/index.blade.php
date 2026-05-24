@@ -11,7 +11,7 @@
     'url'         => $seo['canonical'],
     'publisher'   => [
         '@type' => 'EducationalOrganization',
-        'name'  => config('app.name'),
+        'name'  => setting('site_name', config('app.name')),
         'url'   => url('/'),
     ],
 ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
@@ -41,7 +41,7 @@
                 {{ $category ? "Kategori: {$category}" : 'Semua Artikel' }}
             </h1>
             <p class="text-amber-800/70 text-sm max-w-xl">
-                Informasi terkini, prestasi siswa, dan cerita inspiratif dari komunitas {{ config('app.name') }}.
+                Informasi terkini, prestasi siswa, dan cerita inspiratif dari komunitas {{ setting('site_name', config('app.name')) }}.
             </p>
         </div>
     </section>
