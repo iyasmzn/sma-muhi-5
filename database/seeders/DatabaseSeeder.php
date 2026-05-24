@@ -23,5 +23,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(StatSeeder::class);
+        $this->call(TeacherSeeder::class);
     }
 }

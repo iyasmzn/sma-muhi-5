@@ -119,6 +119,7 @@
 
             <div class="flex items-center gap-2">
                 <a href="/" class="text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-amber-50 hover:text-amber-700 transition-colors" style="color:var(--muted)">Beranda</a>
+                <a href="{{ route('teachers.index') }}" class="text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-amber-50 hover:text-amber-700 transition-colors" style="color:var(--muted)">Guru</a>
                 <a href="/blog" class="text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-amber-50 hover:text-amber-700 transition-colors" style="color:var(--muted)">Blog</a>
                 @if (Route::has('login'))
                     @auth

@@ -166,6 +166,7 @@
                         ['Akademik','#akademik'],
                         ['Kegiatan','#kegiatan'],
                         ['Galeri','#galeri'],
+                        ['Guru', route('teachers.index')],
                         ['Blog','#blog'],
                         ['Kontak','#kontak'],
                     ] as [$label,$href])
@@ -264,14 +265,15 @@
         {{-- Nav items --}}
         <nav class="flex-1 overflow-y-auto px-6 py-6 flex flex-col justify-center gap-1">
             @foreach([
-                ['01','Beranda',  '#'],
-                ['02','Profil',   '#profil'],
-                ['03','SPMB',     '#spmb'],
-                ['04','Akademik', '#akademik'],
-                ['05','Kegiatan', '#kegiatan'],
-                ['06','Galeri',   '#galeri'],
-                ['07','Blog',     '#blog'],
-                ['08','Kontak',   '#kontak'],
+                ['01','Beranda',          '#'],
+                ['02','Profil',           '#profil'],
+                ['03','SPMB',             '#spmb'],
+                ['04','Akademik',         '#akademik'],
+                ['05','Kegiatan',         '#kegiatan'],
+                ['06','Galeri',           '#galeri'],
+                ['07','Guru',             route('teachers.index')],
+                ['08','Blog',             '#blog'],
+                ['09','Kontak',           '#kontak'],
             ] as [$num, $label, $href])
                 <a href="{{ $href }}" @click="mobileOpen = false"
                    class="group flex items-center gap-4 py-3.5 border-b border-white/8 hover:border-amber-500/50 transition-all duration-200">
