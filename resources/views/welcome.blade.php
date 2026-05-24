@@ -103,19 +103,27 @@
     </style>
 </head>
 
+@php
+    $navItems = collect(json_decode(setting('nav_items', ''), true) ?: [
+        ['label' => 'Beranda',  'url' => '/',         'target' => '_self', 'is_active' => true, 'children' => []],
+        ['label' => 'Profil',   'url' => '#profil',   'target' => '_self', 'is_active' => true, 'children' => []],
+        ['label' => 'SPMB',     'url' => '#spmb',     'target' => '_self', 'is_active' => true, 'children' => []],
+        ['label' => 'Akademik', 'url' => '#akademik', 'target' => '_self', 'is_active' => true, 'children' => []],
+        ['label' => 'Guru',     'url' => '/guru',     'target' => '_self', 'is_active' => true, 'children' => []],
+        ['label' => 'Blog',     'url' => '/blog',     'target' => '_self', 'is_active' => true, 'children' => []],
+        ['label' => 'Kontak',   'url' => '#kontak',   'target' => '_self', 'is_active' => true, 'children' => []],
+    ])->where('is_active', true)->values();
+@endphp
+
 <body class="min-h-screen antialiased"
       x-data="{
           mobileOpen: false,
           scrolled: false,
           slide: 0,
-          slides: [
-              { title: 'Unggul dalam Akademik',      sub: 'Raih prestasi terbaik bersama guru-guru berpengalaman dan fasilitas modern.',       img: 'https://picsum.photos/seed/hero-school1/1600/900' },
-              { title: 'Berkarakter & Berintegritas', sub: 'Membentuk generasi beriman, bertakwa, dan berakhlak mulia untuk bangsa.',           img: 'https://picsum.photos/seed/hero-school2/1600/900' },
-              { title: 'Buka Pendaftaran {{ setting('spmb_year', '2026/2027') }}',  sub: 'SPMB resmi dibuka. Daftarkan putra-putri Anda sekarang sebelum batas waktu.',      img: 'https://picsum.photos/seed/hero-school3/1600/900' },
-          ]
+          total: {{ max($slides->count(), 1) }}
       }"
       x-init="
-          setInterval(() => slide = (slide + 1) % slides.length, 5000);
+          setInterval(() => slide = (slide + 1) % total, 5000);
           window.addEventListener('scroll', () => scrolled = window.scrollY > 60, { passive: true });
       ">
 
@@ -159,24 +167,43 @@
 
                 {{-- Desktop nav --}}
                 <nav class="hidden lg:flex items-center gap-0.5">
-                    @foreach([
-                        ['Beranda','#'],
-                        ['Profil','#profil'],
-                        ['SPMB','#spmb'],
-                        ['Akademik','#akademik'],
-                        ['Kegiatan','#kegiatan'],
-                        ['Galeri','#galeri'],
-                        ['Guru', route('teachers.index')],
-                        ['Blog','#blog'],
-                        ['Kontak','#kontak'],
-                    ] as [$label,$href])
-                        <a href="{{ $href }}"
-                           class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-                           :class="scrolled
-                               ? 'text-gray-500 hover:bg-amber-50 hover:text-amber-700'
-                               : 'text-white/80 hover:text-white hover:bg-white/10'">
-                            {{ $label }}
-                        </a>
+                    @foreach($navItems as $item)
+                        @php $children = collect($item['children'] ?? [])->where('is_active', true)->values(); @endphp
+                        @if($children->isNotEmpty())
+                            <div x-data="{ dropOpen: false }" class="relative">
+                                <button @mouseenter="dropOpen = true" @mouseleave="dropOpen = false"
+                                        class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1"
+                                        :class="scrolled ? 'text-gray-500 hover:bg-amber-50 hover:text-amber-700' : 'text-white/80 hover:text-white hover:bg-white/10'">
+                                    {{ $item['label'] }}
+                                    <svg class="w-3 h-3 transition-transform duration-200" :class="dropOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+                                <div x-show="dropOpen"
+                                     x-transition:enter="transition ease-out duration-150"
+                                     x-transition:enter-start="opacity-0 -translate-y-1"
+                                     x-transition:enter-end="opacity-100 translate-y-0"
+                                     x-transition:leave="transition ease-in duration-100"
+                                     x-transition:leave-start="opacity-100 translate-y-0"
+                                     x-transition:leave-end="opacity-0 -translate-y-1"
+                                     @mouseenter="dropOpen = true" @mouseleave="dropOpen = false"
+                                     class="absolute top-full left-0 mt-1 min-w-48 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50 py-1">
+                                    @foreach($children as $child)
+                                        <a href="{{ $child['url'] }}" target="{{ $child['target'] ?? '_self' }}"
+                                           class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-amber-50 hover:text-amber-700 transition-colors">
+                                            <span class="w-1 h-1 rounded-full bg-amber-400 shrink-0"></span>
+                                            {{ $child['label'] }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <a href="{{ $item['url'] }}" target="{{ $item['target'] ?? '_self' }}"
+                               class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                               :class="scrolled ? 'text-gray-500 hover:bg-amber-50 hover:text-amber-700' : 'text-white/80 hover:text-white hover:bg-white/10'">
+                                {{ $item['label'] }}
+                            </a>
+                        @endif
                     @endforeach
                 </nav>
 
@@ -264,26 +291,49 @@
 
         {{-- Nav items --}}
         <nav class="flex-1 overflow-y-auto px-6 py-6 flex flex-col justify-center gap-1">
-            @foreach([
-                ['01','Beranda',          '#'],
-                ['02','Profil',           '#profil'],
-                ['03','SPMB',             '#spmb'],
-                ['04','Akademik',         '#akademik'],
-                ['05','Kegiatan',         '#kegiatan'],
-                ['06','Galeri',           '#galeri'],
-                ['07','Guru',             route('teachers.index')],
-                ['08','Blog',             '#blog'],
-                ['09','Kontak',           '#kontak'],
-            ] as [$num, $label, $href])
-                <a href="{{ $href }}" @click="mobileOpen = false"
-                   class="group flex items-center gap-4 py-3.5 border-b border-white/8 hover:border-amber-500/50 transition-all duration-200">
-                    <span class="text-xs font-bold text-white/25 group-hover:text-amber-500 transition-colors w-6 shrink-0">{{ $num }}</span>
-                    <span class="text-2xl font-bold text-white/70 group-hover:text-white transition-colors tracking-tight">{{ $label }}</span>
-                    <svg class="w-4 h-4 text-white/20 group-hover:text-amber-400 ml-auto shrink-0 transition-all group-hover:translate-x-1 duration-200"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
+            @foreach($navItems as $i => $item)
+                @php $children = collect($item['children'] ?? [])->where('is_active', true)->values(); @endphp
+                @if($children->isNotEmpty())
+                    <div x-data="{ mobileSubOpen: false }">
+                        <button @click="mobileSubOpen = !mobileSubOpen"
+                                class="group w-full flex items-center gap-4 py-3.5 border-b border-white/8 hover:border-amber-500/50 transition-all duration-200">
+                            <span class="text-xs font-bold text-white/25 group-hover:text-amber-500 transition-colors w-6 shrink-0">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span class="text-2xl font-bold text-white/70 group-hover:text-white transition-colors tracking-tight flex-1 text-left">{{ $item['label'] }}</span>
+                            <svg class="w-4 h-4 text-white/20 group-hover:text-amber-400 shrink-0 transition-all duration-200"
+                                 :class="mobileSubOpen ? 'rotate-90' : ''"
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div x-show="mobileSubOpen"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 -translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             class="pl-10 pb-2 space-y-1">
+                            @foreach($children as $child)
+                                <a href="{{ $child['url'] }}" target="{{ $child['target'] ?? '_self' }}"
+                                   @click="mobileOpen = false"
+                                   class="flex items-center gap-2 py-2 text-lg font-medium text-white/55 hover:text-amber-300 transition-colors">
+                                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                    {{ $child['label'] }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @else
+                    <a href="{{ $item['url'] }}" target="{{ $item['target'] ?? '_self' }}"
+                       @click="mobileOpen = false"
+                       class="group flex items-center gap-4 py-3.5 border-b border-white/8 hover:border-amber-500/50 transition-all duration-200">
+                        <span class="text-xs font-bold text-white/25 group-hover:text-amber-500 transition-colors w-6 shrink-0">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                        <span class="text-2xl font-bold text-white/70 group-hover:text-white transition-colors tracking-tight">{{ $item['label'] }}</span>
+                        <svg class="w-4 h-4 text-white/20 group-hover:text-amber-400 ml-auto shrink-0 transition-all group-hover:translate-x-1 duration-200"
+                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                @endif
             @endforeach
         </nav>
 
@@ -319,34 +369,45 @@
     {{-- ═══════════════════════════════════════════════════
          HERO IMAGE WITH SLIDER
     ═══════════════════════════════════════════════════ --}}
+    @if(setting('section_hero', true))
     <section class="relative h-130 sm:h-145 lg:h-160 overflow-hidden -mt-17">
 
-        {{-- Slides --}}
-        <template x-for="(s, i) in slides" :key="i">
-            <div :class="['slide', i === slide ? 'active' : 'inactive']">
-                {{-- Background image — ganti src dengan media dari admin --}}
-                <img :src="s.img" :alt="s.title"
-                     class="absolute inset-0 w-full h-full object-cover">
-                {{-- Dark gradient overlay untuk keterbacaan teks --}}
+        {{-- Slides (server-rendered, Alpine mengontrol visibilitas) --}}
+        @forelse($slides as $index => $s)
+            <div class="slide absolute inset-0 transition-opacity duration-700"
+                 :class="{{ $index }} === slide ? 'opacity-100 z-10' : 'opacity-0 z-0'">
+
+                {{-- Background image --}}
+                <img src="{{ $s->image_url }}"
+                     alt="{{ $s->title }}"
+                     class="absolute inset-0 w-full h-full object-cover"
+                     loading="{{ $index === 0 ? 'eager' : 'lazy' }}">
+
+                {{-- Dark gradient overlay --}}
                 <div class="absolute inset-0"
-                     style="background:linear-gradient(135deg, rgba(0,0,0,.65) 0%, rgba(0,0,0,.35) 60%, rgba(0,0,0,.15) 100%)"></div>
+                     style="background:linear-gradient(135deg,rgba(0,0,0,.65) 0%,rgba(0,0,0,.35) 60%,rgba(0,0,0,.15) 100%)"></div>
+
                 {{-- Content --}}
                 <div class="relative z-10 h-full flex items-center">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
                         <div class="max-w-2xl text-white">
                             <div class="inline-flex items-center gap-2 bg-white/15 border border-white/25 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm mb-5">
                                 <span class="w-2 h-2 bg-amber-300 rounded-full animate-pulse"></span>
-                                <span class="opacity-90 text-sm font-medium" x-text="`${i + 1} / ${slides.length}`"></span>
+                                <span class="opacity-90 text-sm font-medium">{{ $index + 1 }} / {{ $slides->count() }}</span>
                             </div>
-                            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.12] tracking-tight mb-4"
-                                x-text="s.title"></h1>
-                            <p class="text-white/80 text-base sm:text-lg leading-relaxed mb-8 max-w-lg"
-                               x-text="s.sub"></p>
+                            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.12] tracking-tight mb-4">
+                                {{ $s->title }}
+                            </h1>
+                            @if($s->subtitle)
+                                <p class="text-white/80 text-base sm:text-lg leading-relaxed mb-8 max-w-lg">
+                                    {{ $s->subtitle }}
+                                </p>
+                            @endif
                             <div class="flex flex-wrap gap-3">
-                                @if (Route::has('register'))
-                                    <a href="{{ route('register') }}"
+                                @if($s->button_label && $s->button_url)
+                                    <a href="{{ $s->button_url }}"
                                        class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-400 text-amber-900 font-bold hover:bg-amber-300 transition shadow-lg shadow-amber-500/30 text-sm">
-                                        Daftar SPMB Sekarang
+                                        {{ $s->button_label }}
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
                                     </a>
                                 @endif
@@ -359,26 +420,38 @@
                     </div>
                 </div>
             </div>
-        </template>
+        @empty
+            {{-- Fallback jika belum ada slide --}}
+            <div class="absolute inset-0 bg-gradient-to-br from-amber-900 to-amber-700 flex items-center justify-center">
+                <div class="text-center text-white">
+                    <h1 class="text-4xl font-extrabold mb-3">{{ setting('site_name', config('app.name')) }}</h1>
+                    <p class="text-white/80">{{ setting('site_tagline', 'Unggul, Berkarakter, Berprestasi') }}</p>
+                </div>
+            </div>
+        @endforelse
 
         {{-- Dot indicators --}}
-        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-2">
-            <template x-for="(s, i) in slides" :key="i">
-                <button @click="slide = i"
-                        class="transition-all duration-300 rounded-full"
-                        :class="i === slide ? 'w-6 h-2.5 bg-amber-400' : 'w-2.5 h-2.5 bg-white/50 hover:bg-white/80'"></button>
-            </template>
-        </div>
+        @if($slides->count() > 1)
+            <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+                @foreach($slides as $index => $s)
+                    <button @click="slide = {{ $index }}"
+                            class="transition-all duration-300 rounded-full"
+                            :class="{{ $index }} === slide ? 'w-6 h-2.5 bg-amber-400' : 'w-2.5 h-2.5 bg-white/50 hover:bg-white/80'"></button>
+                @endforeach
+            </div>
+        @endif
 
         {{-- Prev / Next arrows --}}
-        <button @click="slide = (slide - 1 + slides.length) % slides.length"
-                class="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-sm text-white flex items-center justify-center transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
-        </button>
-        <button @click="slide = (slide + 1) % slides.length"
-                class="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-sm text-white flex items-center justify-center transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-        </button>
+        @if($slides->count() > 1)
+            <button @click="slide = (slide - 1 + total) % total"
+                    class="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-sm text-white flex items-center justify-center transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button @click="slide = (slide + 1) % total"
+                    class="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-sm text-white flex items-center justify-center transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+            </button>
+        @endif
 
         {{-- Bottom wave --}}
         <div class="absolute bottom-0 inset-x-0 z-10">
@@ -388,9 +461,12 @@
         </div>
     </section>
 
+    @endif
+
     {{-- ═══════════════════════════════════════════════════
          STATIC CONTENT — QUICK LINKS
     ═══════════════════════════════════════════════════ --}}
+    @if(setting('section_quick_links', true))
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-2 pb-10">
         <div class="fi-card p-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1"
              data-aos="fade-up" data-aos-duration="500">
@@ -412,11 +488,14 @@
         </div>
     </section>
 
+    @endif
+
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {{-- ═══════════════════════════════════════════════════
              CARD: CTA SPMB
         ═══════════════════════════════════════════════════ --}}
+        @if(setting('section_spmb', true))
         <section id="spmb" class="mb-6" data-aos="fade-up">
             <div class="rounded-2xl overflow-hidden border border-amber-200"
                  style="background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 60%,#fde68a 100%)">
@@ -466,9 +545,12 @@
             </div>
         </section>
 
+        @endif
+
         {{-- ═══════════════════════════════════════════════════
              CARD: INFORMASI UMUM SMA
         ═══════════════════════════════════════════════════ --}}
+        @if(setting('section_stats', true))
         <section id="profil" class="mb-10">
             @if($stats->isNotEmpty())
                 <div class="grid grid-cols-2 sm:grid-cols-{{ min($stats->count(), 4) }} gap-4">
@@ -487,9 +569,12 @@
             @endif
         </section>
 
+        @endif
+
         {{-- ═══════════════════════════════════════════════════
              SECTION: SAMBUTAN KEPALA SEKOLAH
         ═══════════════════════════════════════════════════ --}}
+        @if(setting('section_principal', true))
         <section id="sambutan" class="mb-12 border-t pt-12" style="border-color:var(--border)">
             <div class="fi-label mb-2" data-aos="fade-up">Sambutan</div>
             <h2 class="text-2xl font-bold mb-8" style="color:var(--text)" data-aos="fade-up" data-aos-delay="50">Sambutan Kepala Sekolah</h2>
@@ -526,9 +611,12 @@
             </div>
         </section>
 
+        @endif
+
         {{-- ═══════════════════════════════════════════════════
              SECTION: CTA SPMB (TAHAPAN)
         ═══════════════════════════════════════════════════ --}}
+        @if(setting('section_spmb_steps', true))
         <section class="mb-12 border-t pt-12" style="border-color:var(--border)">
             <div class="text-center mb-10" data-aos="fade-up">
                 <div class="fi-label mb-2">Cara Mendaftar</div>
@@ -563,9 +651,12 @@
             </div>
         </section>
 
+        @endif
+
         {{-- ═══════════════════════════════════════════════════
              SECTION: KEGIATAN SEKOLAH
         ═══════════════════════════════════════════════════ --}}
+        @if(setting('section_activities', true))
         <section id="kegiatan" class="mb-12 border-t pt-12" style="border-color:var(--border)">
             <div class="flex items-end justify-between gap-4 mb-8" data-aos="fade-up">
                 <div>
@@ -609,9 +700,12 @@
             </div>
         </section>
 
+        @endif
+
         {{-- ═══════════════════════════════════════════════════
              SECTION: GALERI
         ═══════════════════════════════════════════════════ --}}
+        @if(setting('section_gallery', true))
         <section id="galeri" class="mb-12 border-t pt-12" style="border-color:var(--border)">
             <div class="flex items-end justify-between gap-4 mb-8" data-aos="fade-up">
                 <div>
@@ -656,9 +750,12 @@
             </div>
         </section>
 
+        @endif
+
         {{-- ═══════════════════════════════════════════════════
              SECTION: BLOG
         ═══════════════════════════════════════════════════ --}}
+        @if(setting('section_blog', true))
         <section id="blog" class="mb-12 border-t pt-12" style="border-color:var(--border)">
             <div class="flex items-end justify-between gap-4 mb-8" data-aos="fade-up">
                 <div>
@@ -753,7 +850,86 @@
             </div>
         </section>
 
+        @endif
+
     </main>
+
+    {{-- ═══════════════════════════════════════════════════
+         SECTION: KONTAK KAMI
+    ═══════════════════════════════════════════════════ --}}
+    @if(setting('section_contact', true) && $contactItems->isNotEmpty())
+    <section id="kontak-section" class="py-20" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f2236 100%)">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {{-- Header --}}
+            <div class="text-center mb-14" data-aos="fade-up">
+                <div class="inline-flex items-center gap-2 bg-amber-400/15 border border-amber-400/30 text-amber-300 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-widest mb-5">
+                    <span class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"></span>
+                    Hubungi Kami
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white leading-tight mb-4">
+                    Kami Siap Membantu Anda
+                </h2>
+                <p class="text-white/60 text-base max-w-xl mx-auto leading-relaxed">
+                    Punya pertanyaan seputar SPMB, akademik, atau kegiatan sekolah? Jangan ragu untuk menghubungi kami.
+                </p>
+            </div>
+
+            {{-- Contact Cards Grid --}}
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-{{ min($contactItems->count(), 3) }} xl:grid-cols-{{ min($contactItems->count(), 4) }}">
+                @foreach($contactItems as $ci)
+                    <div class="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 transition-all duration-300 hover:bg-white/10 hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/10"
+                         data-aos="fade-up" data-aos-delay="{{ $loop->index * 80 }}">
+
+                        {{-- Glow on hover --}}
+                        <div class="absolute inset-0 rounded-2xl bg-linear-to-br from-amber-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+
+                        {{-- Icon --}}
+                        <div class="w-12 h-12 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-2xl mb-4 group-hover:bg-amber-400/20 transition-colors duration-300">
+                            {{ $ci->icon }}
+                        </div>
+
+                        {{-- Content --}}
+                        <div class="fi-label text-amber-400/80 mb-1 text-[11px]">{{ $ci->label }}</div>
+                        <div class="text-white/85 text-sm font-medium leading-relaxed mb-4">{{ $ci->value }}</div>
+
+                        {{-- Link button --}}
+                        @if($ci->link)
+                            <a href="{{ $ci->link }}"
+                               target="{{ str_starts_with($ci->link, 'http') ? '_blank' : '_self' }}"
+                               rel="{{ str_starts_with($ci->link, 'http') ? 'noopener noreferrer' : '' }}"
+                               class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors group/link">
+                                Buka
+                                <svg class="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                                </svg>
+                            </a>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Bottom CTA --}}
+            <div class="mt-14 text-center" data-aos="fade-up" data-aos-delay="200">
+                <p class="text-white/50 text-sm mb-5">Atau kunjungi langsung kantor kami pada hari dan jam operasional.</p>
+                <div class="flex flex-wrap gap-3 justify-center">
+                    @if(setting('social_whatsapp'))
+                        <a href="https://wa.me/{{ setting('social_whatsapp') }}" target="_blank" rel="noopener"
+                           class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-green-500 text-white font-semibold text-sm hover:bg-green-400 transition shadow-lg shadow-green-500/20">
+                            💬 Chat WhatsApp
+                        </a>
+                    @endif
+                    @if(setting('contact_email'))
+                        <a href="mailto:{{ setting('contact_email') }}"
+                           class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-semibold text-sm hover:bg-white/20 transition">
+                            ✉️ Kirim Email
+                        </a>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </section>
+    @endif
 
     {{-- ═══════════════════════════════════════════════════
          FOOTER

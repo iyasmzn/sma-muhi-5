@@ -24,5 +24,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(StatSeeder::class);
         $this->call(TeacherSeeder::class);
+        $this->call(SlideSeeder::class);
+        $this->call(ContactItemSeeder::class);
     }
 }

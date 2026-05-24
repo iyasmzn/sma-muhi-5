@@ -117,15 +117,25 @@
                 @stack('breadcrumb')
             </nav>
 
-            <div class="flex items-center gap-2">
-                <a href="/" class="text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-amber-50 hover:text-amber-700 transition-colors" style="color:var(--muted)">Beranda</a>
-                <a href="{{ route('teachers.index') }}" class="text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-amber-50 hover:text-amber-700 transition-colors" style="color:var(--muted)">Guru</a>
-                <a href="/blog" class="text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-amber-50 hover:text-amber-700 transition-colors" style="color:var(--muted)">Blog</a>
+            <div class="flex items-center gap-1">
+                @php
+                    $pubNavItems = collect(json_decode(setting('nav_items', ''), true) ?: [
+                        ['label' => 'Beranda', 'url' => '/',      'target' => '_self', 'is_active' => true],
+                        ['label' => 'Guru',    'url' => '/guru',  'target' => '_self', 'is_active' => true],
+                        ['label' => 'Blog',    'url' => '/blog',  'target' => '_self', 'is_active' => true],
+                        ['label' => 'Kontak',  'url' => '/#kontak','target' => '_self', 'is_active' => true],
+                    ])->where('is_active', true)->values();
+                @endphp
+                @foreach($pubNavItems as $item)
+                    <a href="{{ $item['url'] }}" target="{{ $item['target'] ?? '_self' }}"
+                       class="text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-amber-50 hover:text-amber-700 transition-colors"
+                       style="color:var(--muted)">{{ $item['label'] }}</a>
+                @endforeach
                 @if (Route::has('login'))
                     @auth
-                        <a href="{{ url('/dashboard') }}" class="btn-primary text-xs">Dashboard</a>
+                        <a href="{{ url('/dashboard') }}" class="btn-primary text-xs ml-1">Dashboard</a>
                     @else
-                        <a href="{{ route('login') }}" class="btn-outline text-xs">Masuk</a>
+                        <a href="{{ route('login') }}" class="btn-outline text-xs ml-1">Masuk</a>
                     @endauth
                 @endif
             </div>
@@ -155,9 +165,11 @@
             </div>
             <p class="text-xs" style="color:var(--muted)">© {{ date('Y') }} {{ setting('site_name', config('app.name')) }}. Semua hak dilindungi.</p>
             <nav class="flex gap-4">
-                <a href="/" class="text-xs hover:text-amber-600 transition-colors" style="color:var(--muted)">Beranda</a>
-                <a href="/blog" class="text-xs hover:text-amber-600 transition-colors" style="color:var(--muted)">Blog</a>
-                <a href="/#kontak" class="text-xs hover:text-amber-600 transition-colors" style="color:var(--muted)">Kontak</a>
+                @foreach($pubNavItems as $item)
+                    <a href="{{ $item['url'] }}" target="{{ $item['target'] ?? '_self' }}"
+                       class="text-xs hover:text-amber-600 transition-colors"
+                       style="color:var(--muted)">{{ $item['label'] }}</a>
+                @endforeach
             </nav>
         </div>
     </footer>

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ContactItem;
 use App\Models\Post;
+use App\Models\Slide;
 use App\Models\Stat;
 use Illuminate\View\View;
 
@@ -17,7 +19,9 @@ class HomeController extends Controller
             ->get();
 
         $stats = Stat::ordered()->get();
+        $slides = Slide::active()->get();
+        $contactItems = ContactItem::active()->get();
 
-        return view('welcome', compact('posts', 'stats'));
+        return view('welcome', compact('posts', 'stats', 'slides', 'contactItems'));
     }
 }
