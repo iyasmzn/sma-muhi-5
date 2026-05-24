@@ -96,32 +96,48 @@
 <body class="min-h-screen antialiased"
       x-data="{
           mobileOpen: false,
+          scrolled: false,
           slide: 0,
           slides: [
-              { title: 'Unggul dalam Akademik', sub: 'Raih prestasi terbaik bersama guru-guru berpengalaman dan fasilitas modern.', bg: 'from-amber-700 via-amber-600 to-yellow-500' },
-              { title: 'Berkarakter & Berintegritas', sub: 'Membentuk generasi beriman, bertakwa, dan berakhlak mulia untuk bangsa.', bg: 'from-blue-800 via-blue-700 to-blue-500' },
-              { title: 'Buka Pendaftaran 2026/2027', sub: 'SPMB resmi dibuka. Daftarkan putra-putri Anda sekarang sebelum batas waktu.', bg: 'from-emerald-700 via-emerald-600 to-teal-500' },
+              { title: 'Unggul dalam Akademik',      sub: 'Raih prestasi terbaik bersama guru-guru berpengalaman dan fasilitas modern.',       img: 'https://picsum.photos/seed/hero-school1/1600/900' },
+              { title: 'Berkarakter & Berintegritas', sub: 'Membentuk generasi beriman, bertakwa, dan berakhlak mulia untuk bangsa.',           img: 'https://picsum.photos/seed/hero-school2/1600/900' },
+              { title: 'Buka Pendaftaran 2026/2027',  sub: 'SPMB resmi dibuka. Daftarkan putra-putri Anda sekarang sebelum batas waktu.',      img: 'https://picsum.photos/seed/hero-school3/1600/900' },
           ]
       }"
-      x-init="setInterval(() => slide = (slide + 1) % slides.length, 5000)">
+      x-init="
+          setInterval(() => slide = (slide + 1) % slides.length, 5000);
+          window.addEventListener('scroll', () => scrolled = window.scrollY > 60, { passive: true });
+      ">
 
     {{-- ═══════════════════════════════════════════════════
-         NAVIGATION HEADER
+         NAVIGATION HEADER — transparan di atas, solid saat scroll
     ═══════════════════════════════════════════════════ --}}
-    <header class="sticky top-0 z-50" style="background:var(--card); border-bottom:1px solid var(--border)">
-        <div class="amber-bar"></div>
+    <header class="sticky top-0 z-50 transition-all duration-300"
+            :style="scrolled
+                ? 'background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border-bottom:1px solid #e5e7eb;box-shadow:0 1px 3px 0 rgb(0 0 0/.1)'
+                : 'background:transparent;border-bottom:1px solid transparent'">
+
+        {{-- Amber bar — hanya tampil saat scrolled --}}
+        <div class="amber-bar overflow-hidden transition-all duration-300"
+             :style="scrolled ? 'height:3px;opacity:1' : 'height:0;opacity:0'"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 gap-4">
 
                 {{-- Logo --}}
-                <a href="/" class="flex items-center gap-2.5 shrink-0">
-                    <div class="w-9 h-9 rounded-xl bg-amber-500 shadow flex items-center justify-center">
+                <a href="/" class="flex items-center gap-2.5 shrink-0 min-w-0">
+                    <div class="w-9 h-9 shrink-0 rounded-xl bg-amber-500 shadow flex items-center justify-center">
                         <span class="text-white font-extrabold text-base">{{ strtoupper(substr(config('app.name','S'),0,1)) }}</span>
                     </div>
-                    <div class="hidden sm:block leading-tight">
-                        <div class="font-bold text-sm" style="color:var(--text)">{{ config('app.name', 'SMA Negeri 1') }}</div>
-                        <div class="text-[10px] font-medium uppercase tracking-widest text-amber-600">Unggul · Berkarakter</div>
+                    <div class="leading-tight min-w-0">
+                        <div class="font-bold text-sm truncate transition-colors duration-300"
+                             :class="scrolled ? 'text-gray-900' : 'text-white'">
+                            {{ config('app.name', 'SMA Negeri 1') }}
+                        </div>
+                        <div class="text-[10px] font-medium uppercase tracking-widest transition-colors duration-300"
+                             :class="scrolled ? 'text-amber-600' : 'text-amber-300'">
+                            Unggul · Berkarakter
+                        </div>
                     </div>
                 </a>
 
@@ -138,8 +154,12 @@
                         ['Kontak','#kontak'],
                     ] as [$label,$href])
                         <a href="{{ $href }}"
-                           class="px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-amber-50 hover:text-amber-700"
-                           style="color:var(--muted)">{{ $label }}</a>
+                           class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                           :class="scrolled
+                               ? 'text-gray-500 hover:bg-amber-50 hover:text-amber-700'
+                               : 'text-white/80 hover:text-white hover:bg-white/10'">
+                            {{ $label }}
+                        </a>
                     @endforeach
                 </nav>
 
@@ -152,7 +172,14 @@
                                 Dashboard
                             </a>
                         @else
-                            <a href="{{ route('login') }}" class="btn-outline text-xs hidden sm:inline-flex">Masuk</a>
+                            {{-- "Masuk" — outline putih saat transparan, normal saat scrolled --}}
+                            <a href="{{ route('login') }}"
+                               class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border transition-all duration-200"
+                               :class="scrolled
+                                   ? 'border-gray-200 text-gray-700 bg-white hover:border-amber-400 hover:text-amber-700'
+                                   : 'border-white/40 text-white hover:bg-white/10'">
+                                Masuk
+                            </a>
                             @if (Route::has('register'))
                                 <a href="{{ route('register') }}" class="btn-primary text-xs hidden sm:inline-flex">Daftar SPMB</a>
                             @endif
@@ -161,79 +188,124 @@
 
                     {{-- Hamburger --}}
                     <button @click="mobileOpen = !mobileOpen"
-                            class="lg:hidden w-9 h-9 rounded-lg flex flex-col items-center justify-center gap-1.5 transition-colors hover:bg-amber-50"
+                            class="lg:hidden w-9 h-9 rounded-lg flex flex-col items-center justify-center gap-1.5 transition-colors"
+                            :class="scrolled ? 'hover:bg-amber-50' : 'hover:bg-white/10'"
                             :aria-expanded="mobileOpen" aria-label="Toggle menu">
-                        <span class="w-5 h-0.5 bg-current rounded transition-all duration-200"
-                              :class="mobileOpen ? 'rotate-45 translate-y-2' : ''"
-                              style="color:var(--text)"></span>
-                        <span class="w-5 h-0.5 bg-current rounded transition-all duration-200"
-                              :class="mobileOpen ? 'opacity-0' : ''"
-                              style="color:var(--text)"></span>
-                        <span class="w-5 h-0.5 bg-current rounded transition-all duration-200"
-                              :class="mobileOpen ? '-rotate-45 -translate-y-2' : ''"
-                              style="color:var(--text)"></span>
+                        <span class="w-5 h-0.5 rounded transition-all duration-200"
+                              :class="[mobileOpen ? 'rotate-45 translate-y-2' : '', scrolled ? 'bg-gray-700' : 'bg-white']"></span>
+                        <span class="w-5 h-0.5 rounded transition-all duration-200"
+                              :class="[mobileOpen ? 'opacity-0' : '', scrolled ? 'bg-gray-700' : 'bg-white']"></span>
+                        <span class="w-5 h-0.5 rounded transition-all duration-200"
+                              :class="[mobileOpen ? '-rotate-45 -translate-y-2' : '', scrolled ? 'bg-gray-700' : 'bg-white']"></span>
                     </button>
                 </div>
             </div>
         </div>
 
-        {{-- Mobile menu drawer --}}
-        <div x-show="mobileOpen"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 -translate-y-2"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100 translate-y-0"
-             x-transition:leave-end="opacity-0 -translate-y-2"
-             class="lg:hidden border-t"
-             style="background:var(--card); border-color:var(--border)"
-             @click.outside="mobileOpen = false">
-            <div class="max-w-7xl mx-auto px-4 py-3 grid grid-cols-2 gap-1">
-                @foreach([
-                    ['Beranda','#','🏠'],
-                    ['Profil','#profil','🏫'],
-                    ['SPMB','#spmb','📋'],
-                    ['Akademik','#akademik','📚'],
-                    ['Kegiatan','#kegiatan','⚽'],
-                    ['Galeri','#galeri','🖼️'],
-                    ['Blog','#blog','📰'],
-                    ['Kontak','#kontak','📞'],
-                ] as [$label,$href,$icon])
-                    <a href="{{ $href }}" @click="mobileOpen = false"
-                       class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors hover:bg-amber-50 hover:text-amber-700"
-                       style="color:var(--muted)">
-                        <span>{{ $icon }}</span>{{ $label }}
-                    </a>
-                @endforeach
-            </div>
-            @if (Route::has('login'))
-                <div class="px-4 pb-4 flex gap-2 border-t pt-3" style="border-color:var(--border)">
-                    @auth
-                        <a href="{{ url('/dashboard') }}" class="btn-primary flex-1 justify-center text-sm">Dashboard</a>
-                    @else
-                        <a href="{{ route('login') }}" class="btn-outline flex-1 justify-center text-sm">Masuk</a>
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="btn-primary flex-1 justify-center text-sm">Daftar SPMB</a>
-                        @endif
-                    @endauth
-                </div>
-            @endif
-        </div>
     </header>
+
+    {{-- ═══════════════════════════════════════════════════
+         MOBILE FULL-SCREEN MENU OVERLAY
+    ═══════════════════════════════════════════════════ --}}
+    <div x-show="mobileOpen"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         class="lg:hidden fixed inset-0 flex flex-col"
+         style="z-index:60; background:linear-gradient(145deg,#0f172a 0%,#1a2744 50%,#0f2236 100%)"
+         x-trap.noscroll="mobileOpen">
+
+        {{-- Top bar: logo + close --}}
+        <div class="flex items-center justify-between px-6 py-4 border-b border-white/10 shrink-0">
+            <a href="/" @click="mobileOpen = false" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center shadow-lg">
+                    <span class="text-white font-extrabold text-base">{{ strtoupper(substr(config('app.name','S'),0,1)) }}</span>
+                </div>
+                <div>
+                    <div class="font-bold text-white text-sm">{{ config('app.name', 'SMA Negeri 1') }}</div>
+                    <div class="text-[10px] font-semibold uppercase tracking-widest text-amber-400">Unggul · Berkarakter</div>
+                </div>
+            </a>
+
+            {{-- Close button --}}
+            <button @click="mobileOpen = false"
+                    class="w-10 h-10 rounded-xl border border-white/20 flex items-center justify-center text-white/70 hover:text-white hover:border-white/40 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        {{-- Nav items --}}
+        <nav class="flex-1 overflow-y-auto px-6 py-6 flex flex-col justify-center gap-1">
+            @foreach([
+                ['01','Beranda',  '#'],
+                ['02','Profil',   '#profil'],
+                ['03','SPMB',     '#spmb'],
+                ['04','Akademik', '#akademik'],
+                ['05','Kegiatan', '#kegiatan'],
+                ['06','Galeri',   '#galeri'],
+                ['07','Blog',     '#blog'],
+                ['08','Kontak',   '#kontak'],
+            ] as [$num, $label, $href])
+                <a href="{{ $href }}" @click="mobileOpen = false"
+                   class="group flex items-center gap-4 py-3.5 border-b border-white/8 hover:border-amber-500/50 transition-all duration-200">
+                    <span class="text-xs font-bold text-white/25 group-hover:text-amber-500 transition-colors w-6 shrink-0">{{ $num }}</span>
+                    <span class="text-2xl font-bold text-white/70 group-hover:text-white transition-colors tracking-tight">{{ $label }}</span>
+                    <svg class="w-4 h-4 text-white/20 group-hover:text-amber-400 ml-auto shrink-0 transition-all group-hover:translate-x-1 duration-200"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            @endforeach
+        </nav>
+
+        {{-- Auth buttons --}}
+        <div class="shrink-0 px-6 py-6 border-t border-white/10 space-y-3">
+            @if (Route::has('login'))
+                @auth
+                    <a href="{{ url('/dashboard') }}"
+                       class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-amber-500 text-white font-bold hover:bg-amber-400 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        Dashboard
+                    </a>
+                @else
+                    @if (Route::has('register'))
+                        <a href="{{ route('register') }}"
+                           class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-amber-500 text-white font-bold hover:bg-amber-400 transition-colors">
+                            Daftar SPMB Sekarang
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                        </a>
+                    @endif
+                    <a href="{{ route('login') }}"
+                       class="flex items-center justify-center w-full py-3 rounded-xl border border-white/25 text-white/80 font-semibold hover:bg-white/10 hover:text-white transition-colors">
+                        Masuk
+                    </a>
+                @endauth
+            @endif
+
+            {{-- Tagline --}}
+            <p class="text-center text-xs text-white/30 pt-1">© {{ date('Y') }} {{ config('app.name') }}</p>
+        </div>
+    </div>
 
     {{-- ═══════════════════════════════════════════════════
          HERO IMAGE WITH SLIDER
     ═══════════════════════════════════════════════════ --}}
-    <section class="relative h-130 sm:h-145 lg:h-160 overflow-hidden">
+    <section class="relative h-130 sm:h-145 lg:h-160 overflow-hidden -mt-17">
 
         {{-- Slides --}}
         <template x-for="(s, i) in slides" :key="i">
             <div :class="['slide', i === slide ? 'active' : 'inactive']">
-                <div class="absolute inset-0 bg-linear-to-br"
-                     :class="s.bg"></div>
-                {{-- Pattern overlay --}}
-                <div class="absolute inset-0 opacity-10"
-                     style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:28px 28px"></div>
+                {{-- Background image — ganti src dengan media dari admin --}}
+                <img :src="s.img" :alt="s.title"
+                     class="absolute inset-0 w-full h-full object-cover">
+                {{-- Dark gradient overlay untuk keterbacaan teks --}}
+                <div class="absolute inset-0"
+                     style="background:linear-gradient(135deg, rgba(0,0,0,.65) 0%, rgba(0,0,0,.35) 60%, rgba(0,0,0,.15) 100%)"></div>
                 {{-- Content --}}
                 <div class="relative z-10 h-full flex items-center">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
@@ -520,22 +592,28 @@
 
             <div class="masonry">
                 @foreach([
-                    ['from-amber-400 to-amber-600',    'Upacara Bendera',    '🚩', '176px'],
-                    ['from-blue-500 to-blue-700',      'Lab Komputer',       '💻', '260px'],
-                    ['from-emerald-500 to-emerald-700','Lapangan Olahraga',  '🏃', '200px'],
-                    ['from-purple-500 to-purple-700',  'Pentas Seni',        '🎭', '240px'],
-                    ['from-rose-500 to-rose-700',      'Wisuda & Kelulusan', '🎓', '176px'],
-                    ['from-cyan-500 to-cyan-700',      'Laboratorium IPA',   '🔬', '220px'],
-                    ['from-orange-500 to-orange-700',  'Perpustakaan',       '📚', '196px'],
-                    ['from-indigo-500 to-indigo-700',  'Ruang Kelas',        '🏫', '210px'],
-                    ['from-teal-500 to-teal-700',      'Aula Sekolah',       '🏟️', '180px'],
-                ] as [$gradient, $caption, $icon, $h])
+                    ['upacara',      'Upacara Bendera',    '176px'],
+                    ['computer-lab', 'Lab Komputer',       '260px'],
+                    ['sports-field', 'Lapangan Olahraga',  '200px'],
+                    ['stage-drama',  'Pentas Seni',        '240px'],
+                    ['graduation',   'Wisuda & Kelulusan', '176px'],
+                    ['science-lab',  'Laboratorium IPA',   '220px'],
+                    ['library',      'Perpustakaan',       '196px'],
+                    ['classroom',    'Ruang Kelas',        '210px'],
+                    ['school-hall',  'Aula Sekolah',       '180px'],
+                ] as [$seed, $caption, $h])
                     <div class="masonry-item group" style="height:{{ $h }}">
-                        <div class="absolute inset-0 bg-linear-to-br {{ $gradient }} flex items-center justify-center">
-                            <span class="text-4xl opacity-50 group-hover:opacity-80 group-hover:scale-110 transition-all duration-300">{{ $icon }}</span>
-                        </div>
-                        <div class="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end">
-                            <div class="w-full px-3 py-2.5 text-white text-xs font-semibold translate-y-2 group-hover:translate-y-0 transition-transform duration-200">
+                        {{-- Ganti src dengan URL media dari admin setelah upload --}}
+                        <img src="https://picsum.photos/seed/{{ $seed }}/800/600"
+                             alt="{{ $caption }}"
+                             loading="lazy"
+                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        {{-- Caption overlay — selalu terlihat tipis, lebih tebal saat hover --}}
+                        <div class="absolute inset-0 bg-linear-to-t from-black/60 via-black/10 to-transparent flex items-end">
+                            <div class="w-full px-3 py-2.5 text-white text-xs font-semibold
+                                        translate-y-1 group-hover:translate-y-0
+                                        opacity-70 group-hover:opacity-100
+                                        transition-all duration-200">
                                 {{ $caption }}
                             </div>
                         </div>
@@ -562,8 +640,12 @@
             {{-- Featured post --}}
             <article class="fi-card overflow-hidden mb-5">
                 <div class="grid lg:grid-cols-5">
-                    <div class="lg:col-span-2 h-48 lg:h-auto bg-linear-to-br from-amber-500 to-amber-700 flex items-center justify-center p-6">
-                        <span class="text-6xl">🏅</span>
+                    {{-- Ganti src dengan media dari admin --}}
+                    <div class="lg:col-span-2 h-52 lg:h-auto relative overflow-hidden">
+                        <img src="https://picsum.photos/seed/olympiad-gold/800/600"
+                             alt="Olimpiade Sains Nasional 2026"
+                             class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-linear-to-t from-black/40 to-transparent"></div>
                     </div>
                     <div class="lg:col-span-3 p-6 flex flex-col justify-center">
                         <div class="flex items-center gap-2 mb-3">
@@ -593,29 +675,35 @@
             {{-- Post grid --}}
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach([
-                    ['📸', 'amber',  'Berita',    '20 Mei 2026', 'Hari Olahraga Nasional: Ratusan Siswa Ikut Gerak Jalan',           'Semarak peringatan HOR diwarnai berbagai perlombaan olahraga antar kelas.'],
-                    ['🔬', 'blue',   'Akademik',  '18 Mei 2026', 'Lab Fisika Baru Resmi Dibuka, Fasilitas Semakin Lengkap',          'Laboratorium fisika canggih kini tersedia untuk menunjang pembelajaran sains.'],
-                    ['🌿', 'green',  'Lingkungan','16 Mei 2026', 'Program Sekolah Hijau: Siswa Tanam 500 Pohon di Lingkungan Sekolah','Inisiatif peduli lingkungan oleh siswa kelas XI sebagai proyek P5.'],
-                    ['🎓', 'purple', 'Event',     '14 Mei 2026', 'Gladi Bersih Wisuda Kelas XII Berjalan dengan Lancar',             'Persiapan wisuda telah rampung. Upacara kelulusan akan digelar 28 Juni.'],
-                    ['💻', 'amber',  'Teknologi', '12 Mei 2026', 'Portal Akademik Versi Baru Diluncurkan untuk Orang Tua & Siswa',   'Fitur baru meliputi update nilai real-time, absensi, dan jadwal pelajaran.'],
-                    ['🧘', 'blue',   'Kesehatan', '10 Mei 2026', 'Pekan Kesehatan Mental: Yuk Jaga Keseimbangan Jiwa dan Raga',     'Berbagai workshop, konseling gratis, dan sesi meditasi untuk seluruh siswa.'],
-                ] as [$icon, $color, $tag, $date, $title, $excerpt])
+                    ['sports-run',  'amber',  'Berita',    '20 Mei 2026', 'Hari Olahraga Nasional: Ratusan Siswa Ikut Gerak Jalan',            'Semarak peringatan HOR diwarnai berbagai perlombaan olahraga antar kelas.'],
+                    ['physics-lab', 'blue',   'Akademik',  '18 Mei 2026', 'Lab Fisika Baru Resmi Dibuka, Fasilitas Semakin Lengkap',           'Laboratorium fisika canggih kini tersedia untuk menunjang pembelajaran sains.'],
+                    ['green-plant', 'green',  'Lingkungan','16 Mei 2026', 'Program Sekolah Hijau: Siswa Tanam 500 Pohon di Lingkungan Sekolah','Inisiatif peduli lingkungan oleh siswa kelas XI sebagai proyek P5.'],
+                    ['graduation2', 'purple', 'Event',     '14 Mei 2026', 'Gladi Bersih Wisuda Kelas XII Berjalan dengan Lancar',              'Persiapan wisuda telah rampung. Upacara kelulusan akan digelar 28 Juni.'],
+                    ['tech-portal', 'amber',  'Teknologi', '12 Mei 2026', 'Portal Akademik Versi Baru Diluncurkan untuk Orang Tua & Siswa',    'Fitur baru meliputi update nilai real-time, absensi, dan jadwal pelajaran.'],
+                    ['meditation',  'blue',   'Kesehatan', '10 Mei 2026', 'Pekan Kesehatan Mental: Yuk Jaga Keseimbangan Jiwa dan Raga',      'Berbagai workshop, konseling gratis, dan sesi meditasi untuk seluruh siswa.'],
+                ] as [$seed, $color, $tag, $date, $title, $excerpt])
                     @php
                         $tc = [
-                            'amber'  => ['bg-amber-50 text-amber-700 border-amber-200',  'text-amber-600'],
-                            'blue'   => ['bg-blue-50 text-blue-700 border-blue-200',     'text-blue-600'],
-                            'green'  => ['bg-green-50 text-green-700 border-green-200',  'text-green-600'],
+                            'amber'  => ['bg-amber-50 text-amber-700 border-amber-200',   'text-amber-600'],
+                            'blue'   => ['bg-blue-50 text-blue-700 border-blue-200',      'text-blue-600'],
+                            'green'  => ['bg-green-50 text-green-700 border-green-200',   'text-green-600'],
                             'purple' => ['bg-purple-50 text-purple-700 border-purple-200','text-purple-600'],
                         ][$color];
                     @endphp
-                    <article class="fi-card fi-card-hover flex flex-col overflow-hidden">
-                        <div class="h-1 {{ str_replace('text-','bg-',$tc[1]) }} opacity-60"></div>
-                        <div class="p-5 flex flex-col flex-1">
-                            <div class="flex items-center gap-2 mb-3">
-                                <span class="text-xl">{{ $icon }}</span>
-                                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md border {{ $tc[0] }}">{{ $tag }}</span>
-                                <span class="text-[11px] ml-auto" style="color:var(--muted)">{{ $date }}</span>
+                    <article class="fi-card fi-card-hover group flex flex-col overflow-hidden">
+                        {{-- Thumbnail — ganti src dengan media dari admin --}}
+                        <div class="relative h-44 overflow-hidden">
+                            <img src="https://picsum.photos/seed/{{ $seed }}/600/400"
+                                 alt="{{ $title }}"
+                                 loading="lazy"
+                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            {{-- Badge di atas gambar --}}
+                            <div class="absolute top-3 left-3">
+                                <span class="text-[11px] font-semibold px-2.5 py-1 rounded-md border backdrop-blur-sm bg-white/80 {{ $tc[0] }}">{{ $tag }}</span>
                             </div>
+                        </div>
+                        <div class="p-5 flex flex-col flex-1">
+                            <span class="text-[11px] mb-2 block" style="color:var(--muted)">{{ $date }}</span>
                             <h3 class="font-semibold text-sm leading-snug mb-2 line-clamp-2" style="color:var(--text)">{{ $title }}</h3>
                             <p class="text-xs leading-relaxed flex-1 line-clamp-3" style="color:var(--muted)">{{ $excerpt }}</p>
                             <a href="#" class="mt-4 text-xs font-semibold {{ $tc[1] }} hover:underline inline-flex items-center gap-1">
