@@ -3,6 +3,7 @@
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\StaticPageController;
 use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +16,9 @@ Route::get('/blog/{slug}', [PostController::class, 'show'])->name('blog.show');
 // Tenaga Pendidik
 Route::get('/guru', [TeacherController::class, 'index'])->name('teachers.index');
 Route::get('/guru/{teacher}', [TeacherController::class, 'show'])->name('teachers.show');
+
+// Halaman Statis
+Route::get('/page/{slug}', [StaticPageController::class, 'show'])->name('page.show');
 
 // Unduhan
 Route::get('/unduhan', [DownloadController::class, 'index'])->name('downloads.index');
