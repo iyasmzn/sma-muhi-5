@@ -5,10 +5,11 @@ namespace App\Filament\Pages;
 use App\Models\Setting;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -31,20 +32,39 @@ class LandingPageSettings extends Page
     /** @var array<string, mixed>|null */
     public ?array $data = [];
 
+    /** @return array<int, array{key: string, label: string, visible: bool}> */
+    private static function defaultSections(): array
+    {
+        return [
+            ['key' => 'section_hero',        'label' => '🖼️  Hero Image Slider',        'visible' => true],
+            ['key' => 'section_quick_links', 'label' => '🔗  Tautan Cepat',              'visible' => true],
+            ['key' => 'section_spmb',        'label' => '📋  Kartu SPMB',               'visible' => true],
+            ['key' => 'section_stats',       'label' => '📊  Statistik Sekolah',         'visible' => true],
+            ['key' => 'section_principal',   'label' => '👨‍💼  Sambutan Kepala Sekolah', 'visible' => true],
+            ['key' => 'section_spmb_steps',  'label' => '📝  Tahapan SPMB',             'visible' => true],
+            ['key' => 'section_activities',  'label' => '⚽  Kegiatan & Ekskul',         'visible' => true],
+            ['key' => 'section_gallery',     'label' => '🖼️  Galeri Foto',              'visible' => true],
+            ['key' => 'section_blog',        'label' => '📰  Blog & Berita',             'visible' => true],
+            ['key' => 'section_contact',     'label' => '📞  Kontak Kami',               'visible' => true],
+        ];
+    }
+
     public function mount(): void
     {
-        $this->form->fill([
-            'section_hero' => (bool) Setting::get('section_hero', true),
-            'section_quick_links' => (bool) Setting::get('section_quick_links', true),
-            'section_spmb' => (bool) Setting::get('section_spmb', true),
-            'section_stats' => (bool) Setting::get('section_stats', true),
-            'section_principal' => (bool) Setting::get('section_principal', true),
-            'section_spmb_steps' => (bool) Setting::get('section_spmb_steps', true),
-            'section_activities' => (bool) Setting::get('section_activities', true),
-            'section_gallery' => (bool) Setting::get('section_gallery', true),
-            'section_blog' => (bool) Setting::get('section_blog', true),
-            'section_contact' => (bool) Setting::get('section_contact', true),
-        ]);
+        $saved = Setting::get('section_order');
+        $sections = $saved
+            ? (json_decode($saved, true) ?: self::defaultSections())
+            : self::defaultSections();
+
+        // Ensure label is always present (in case old data lacked it)
+        $labelMap = collect(self::defaultSections())->keyBy('key');
+        $sections = array_map(function (array $section) use ($labelMap): array {
+            $section['label'] = $labelMap->get($section['key'])['label'] ?? $section['key'];
+
+            return $section;
+        }, $sections);
+
+        $this->form->fill(['sections' => $sections]);
     }
 
     public function defaultForm(Schema $schema): Schema
@@ -55,61 +75,35 @@ class LandingPageSettings extends Page
     public function form(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Visibilitas Seksi')
-                ->description('Aktifkan atau nonaktifkan tampilan setiap seksi di halaman depan.')
-                ->icon('heroicon-o-eye')
+            Section::make('Urutan & Visibilitas Seksi')
+                ->description('Drag dan drop untuk mengatur urutan tampilan. Aktifkan atau nonaktifkan setiap seksi.')
+                ->icon('heroicon-o-queue-list')
                 ->schema([
-                    Grid::make(2)->schema([
-                        Toggle::make('section_hero')
-                            ->label('🖼️  Hero Image Slider')
-                            ->helperText('Slider gambar besar di bagian paling atas halaman.')
-                            ->onColor('success'),
+                    Repeater::make('sections')
+                        ->label('')
+                        ->addable(false)
+                        ->deletable(false)
+                        ->reorderableWithDragAndDrop(true)
+                        ->schema([
+                            TextInput::make('key')
+                                ->hiddenLabel()
+                                ->disabled()
+                                ->dehydrated(true)
+                                ->extraInputAttributes(['class' => 'hidden'])
+                                ->columnSpan(0),
 
-                        Toggle::make('section_quick_links')
-                            ->label('🔗  Tautan Cepat')
-                            ->helperText('Bar ikon pintasan (SPMB, E-Learning, Jadwal, dst.).')
-                            ->onColor('success'),
+                            TextInput::make('label')
+                                ->label('Seksi')
+                                ->disabled()
+                                ->dehydrated(false)
+                                ->columnSpan(3),
 
-                        Toggle::make('section_spmb')
-                            ->label('📋  Kartu SPMB')
-                            ->helperText('Banner CTA pendaftaran peserta didik baru.')
-                            ->onColor('success'),
-
-                        Toggle::make('section_stats')
-                            ->label('📊  Statistik Sekolah')
-                            ->helperText('4 kartu angka: berdiri, siswa, guru, prestasi.')
-                            ->onColor('success'),
-
-                        Toggle::make('section_principal')
-                            ->label('👨‍💼  Sambutan Kepala Sekolah')
-                            ->helperText('Foto dan pesan sambutan dari kepala sekolah.')
-                            ->onColor('success'),
-
-                        Toggle::make('section_spmb_steps')
-                            ->label('📝  Tahapan SPMB')
-                            ->helperText('4 langkah alur pendaftaran peserta didik baru.')
-                            ->onColor('success'),
-
-                        Toggle::make('section_activities')
-                            ->label('⚽  Kegiatan & Ekskul')
-                            ->helperText('Kartu-kartu kegiatan ekstrakurikuler sekolah.')
-                            ->onColor('success'),
-
-                        Toggle::make('section_gallery')
-                            ->label('🖼️  Galeri Foto')
-                            ->helperText('Grid masonry foto-foto sekolah.')
-                            ->onColor('success'),
-
-                        Toggle::make('section_blog')
-                            ->label('📰  Blog & Berita')
-                            ->helperText('Artikel dan berita terbaru dari sekolah.')
-                            ->onColor('success'),
-
-                        Toggle::make('section_contact')
-                            ->label('📞  Kontak Kami')
-                            ->helperText('Seksi informasi kontak sebelum footer.')
-                            ->onColor('success'),
-                    ]),
+                            Toggle::make('visible')
+                                ->label('Tampilkan')
+                                ->onColor('success')
+                                ->columnSpan(1),
+                        ])
+                        ->columns(4),
                 ]),
         ]);
     }
@@ -118,11 +112,14 @@ class LandingPageSettings extends Page
     {
         $data = $this->form->getState();
 
-        Setting::setMany($data);
+        // array_values preserves drag-and-drop order from Repeater
+        $sections = array_values($data['sections'] ?? []);
+
+        Setting::set('section_order', json_encode($sections));
 
         Notification::make()
             ->success()
-            ->title('Pengaturan halaman depan disimpan')
+            ->title('Urutan dan visibilitas seksi disimpan')
             ->send();
     }
 
