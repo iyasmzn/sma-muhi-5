@@ -26,16 +26,29 @@
     <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
 
     <style>
-        /* ── Filament design tokens ── */
+        /* ── Warna utama dari pengaturan admin ───────────────────── */
         :root {
             --bg:       #f9fafb;
             --card:     #ffffff;
             --border:   #e5e7eb;
             --text:     #030712;
             --muted:    #6b7280;
-            --amber:    #d97706;
-            --amber-dk: #b45309;
-            --amber-lt: #fffbeb;
+
+            --primary: {{ setting('theme_primary_color', '#d97706') }};
+
+            /* Override seluruh Tailwind v4 amber palette dengan --primary.
+               Non-layered CSS menang atas @layer theme, sehingga semua
+               utility class amber (text-amber-*, bg-amber-*, dll.) ikut berubah. */
+            --color-amber-50:  color-mix(in oklab, var(--primary)  8%, white);
+            --color-amber-100: color-mix(in oklab, var(--primary) 15%, white);
+            --color-amber-200: color-mix(in oklab, var(--primary) 28%, white);
+            --color-amber-300: color-mix(in oklab, var(--primary) 45%, white);
+            --color-amber-400: color-mix(in oklab, var(--primary) 68%, white);
+            --color-amber-500: color-mix(in oklab, var(--primary) 85%, white);
+            --color-amber-600: var(--primary);
+            --color-amber-700: color-mix(in oklab, var(--primary) 78%, black);
+            --color-amber-800: color-mix(in oklab, var(--primary) 58%, black);
+            --color-amber-900: color-mix(in oklab, var(--primary) 42%, black);
         }
         .dark {
             --bg:     #030712;
@@ -55,26 +68,26 @@
             box-shadow: 0 1px 2px 0 rgb(0 0 0/.05);
             transition: box-shadow .15s, border-color .15s;
         }
-        .fi-card-hover:hover { box-shadow: 0 6px 20px rgb(0 0 0/.1); border-color: #fcd34d; }
+        .fi-card-hover:hover { box-shadow: 0 6px 20px rgb(0 0 0/.1); border-color: var(--color-amber-300); }
 
         /* Buttons */
         .btn-primary {
             display: inline-flex; align-items: center; gap: .5rem;
             padding: .6rem 1.25rem; border-radius: .5rem; font-size: .875rem; font-weight: 600;
-            background: #d97706; color: #fff; transition: background .15s;
+            background: var(--primary); color: #fff; transition: background .15s;
         }
-        .btn-primary:hover { background: #b45309; }
+        .btn-primary:hover { background: var(--color-amber-700); }
 
         .btn-outline {
             display: inline-flex; align-items: center; gap: .5rem;
             padding: .6rem 1.25rem; border-radius: .5rem; font-size: .875rem; font-weight: 600;
             border: 1px solid var(--border); color: var(--text); background: var(--card); transition: border-color .15s, color .15s;
         }
-        .btn-outline:hover { border-color: #d97706; color: #d97706; }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
 
         /* Labels */
-        .fi-label { font-size: .6875rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #d97706; }
-        .fi-badge  { display:inline-flex; align-items:center; gap:.25rem; padding:.125rem .625rem; border-radius:9999px; font-size:.75rem; font-weight:600; background:#fffbeb; color:#92400e; border:1px solid #fde68a; }
+        .fi-label { font-size: .6875rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--primary); }
+        .fi-badge  { display:inline-flex; align-items:center; gap:.25rem; padding:.125rem .625rem; border-radius:9999px; font-size:.75rem; font-weight:600; background:var(--color-amber-50); color:var(--color-amber-800); border:1px solid var(--color-amber-200); }
 
         /* Hero slider */
         .slide { position:absolute; inset:0; transition: opacity .7s ease; }
@@ -94,8 +107,8 @@
             cursor: pointer;
         }
 
-        /* Amber top divider */
-        .amber-bar { height:3px; background:linear-gradient(90deg,#d97706,#fbbf24 60%,transparent); }
+        /* Top divider — mengikuti warna primary */
+        .amber-bar { height:3px; background:linear-gradient(90deg, var(--primary), color-mix(in oklab, var(--primary) 55%, white) 60%, transparent); }
 
         @keyframes fadeUp{ from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
         .fade-up{ animation:fadeUp .55s ease both; }

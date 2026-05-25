@@ -63,17 +63,35 @@
     <style>
         :root {
             --bg:     #f9fafb; --card:   #ffffff; --border: #e5e7eb;
-            --text:   #030712; --muted:  #6b7280; --amber:  #d97706;
+            --text:   #030712; --muted:  #6b7280;
+
+            /* ── Warna utama dari pengaturan admin ────────────────────── */
+            --primary: {{ setting('theme_primary_color', '#d97706') }};
+
+            /* ── Override seluruh Tailwind amber palette dengan --primary ─
+               Karena Tailwind v4 mendefinisikan warna dalam @layer theme,
+               deklarasi non-layered di sini selalu menang (cascade layer rules).
+               color-mix(in oklab, ...) menghasilkan shades yang perceptually uniform. */
+            --color-amber-50:  color-mix(in oklab, var(--primary)  8%, white);
+            --color-amber-100: color-mix(in oklab, var(--primary) 15%, white);
+            --color-amber-200: color-mix(in oklab, var(--primary) 28%, white);
+            --color-amber-300: color-mix(in oklab, var(--primary) 45%, white);
+            --color-amber-400: color-mix(in oklab, var(--primary) 68%, white);
+            --color-amber-500: color-mix(in oklab, var(--primary) 85%, white);
+            --color-amber-600: var(--primary);
+            --color-amber-700: color-mix(in oklab, var(--primary) 78%, black);
+            --color-amber-800: color-mix(in oklab, var(--primary) 58%, black);
+            --color-amber-900: color-mix(in oklab, var(--primary) 42%, black);
         }
         body { background:var(--bg); color:var(--text); font-family:'Instrument Sans',ui-sans-serif,system-ui,sans-serif; }
         .fi-card { background:var(--card); border:1px solid var(--border); border-radius:.75rem; box-shadow:0 1px 2px 0 rgb(0 0 0/.05); transition:box-shadow .15s,border-color .15s; }
-        .fi-card-hover:hover { box-shadow:0 6px 20px rgb(0 0 0/.1); border-color:#fcd34d; }
-        .btn-primary { display:inline-flex; align-items:center; gap:.5rem; padding:.6rem 1.25rem; border-radius:.5rem; font-size:.875rem; font-weight:600; background:#d97706; color:#fff; transition:background .15s; }
-        .btn-primary:hover { background:#b45309; }
+        .fi-card-hover:hover { box-shadow:0 6px 20px rgb(0 0 0/.1); border-color:var(--color-amber-300); }
+        .btn-primary { display:inline-flex; align-items:center; gap:.5rem; padding:.6rem 1.25rem; border-radius:.5rem; font-size:.875rem; font-weight:600; background:var(--primary); color:#fff; transition:background .15s; }
+        .btn-primary:hover { background:var(--color-amber-700); }
         .btn-outline { display:inline-flex; align-items:center; gap:.5rem; padding:.6rem 1.25rem; border-radius:.5rem; font-size:.875rem; font-weight:600; border:1px solid var(--border); color:var(--text); background:var(--card); transition:border-color .15s,color .15s; }
-        .btn-outline:hover { border-color:#d97706; color:#d97706; }
-        .fi-label { font-size:.6875rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#d97706; }
-        .amber-bar { height:3px; background:linear-gradient(90deg,#d97706,#fbbf24 60%,transparent); }
+        .btn-outline:hover { border-color:var(--primary); color:var(--primary); }
+        .fi-label { font-size:.6875rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--primary); }
+        .amber-bar { height:3px; background:linear-gradient(90deg, var(--primary), color-mix(in oklab, var(--primary) 55%, white) 60%, transparent); }
 
         /* Prose content */
         .prose h2 { font-size:1.25rem; font-weight:700; margin-top:1.75rem; margin-bottom:.75rem; color:var(--text); }
@@ -82,8 +100,8 @@
         .prose ul { list-style:disc; padding-left:1.5rem; margin-bottom:1rem; color:var(--muted); }
         .prose ol { list-style:decimal; padding-left:1.5rem; margin-bottom:1rem; color:var(--muted); }
         .prose li { margin-bottom:.4rem; line-height:1.7; }
-        .prose blockquote { border-left:3px solid #d97706; padding-left:1rem; margin:1.5rem 0; color:var(--muted); font-style:italic; }
-        .prose a  { color:#d97706; text-decoration:underline; text-underline-offset:2px; }
+        .prose blockquote { border-left:3px solid var(--primary); padding-left:1rem; margin:1.5rem 0; color:var(--muted); font-style:italic; }
+        .prose a  { color:var(--primary); text-decoration:underline; text-underline-offset:2px; }
         .prose strong { color:var(--text); }
     </style>
 
