@@ -23,10 +23,10 @@ class SlideForm
                         ->disk('public')
                         ->directory('slides')
                         ->visibility('public')
-                        ->imageResizeMode('cover')
-                        ->imageCropAspectRatio('16:9')
-                        ->imageResizeTargetWidth('1600')
-                        ->imageResizeTargetHeight('900')
+                        ->automaticallyCropImagesToAspectRatio('16:9')
+                        ->automaticallyResizeImagesMode('cover')
+                        ->automaticallyResizeImagesToWidth('1600')
+                        ->automaticallyResizeImagesToHeight('900')
                         ->hint('Akan di-resize ke 1600×900px (16:9). Biarkan kosong untuk menggunakan placeholder.')
                         ->columnSpanFull(),
                 ]),
@@ -55,7 +55,6 @@ class SlideForm
 
                         TextInput::make('button_url')
                             ->label('URL Tombol CTA')
-                            ->url()
                             ->maxLength(255)
                             ->placeholder('https://... atau #spmb'),
                     ]),

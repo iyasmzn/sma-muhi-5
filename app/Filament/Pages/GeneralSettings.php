@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\Setting;
+use App\Services\MediaLibraryService;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
@@ -112,8 +113,8 @@ class GeneralSettings extends Page
                             ->disk('public')
                             ->directory('settings')
                             ->visibility('public')
-                            ->imageResizeTargetWidth('400')
-                            ->imageResizeTargetHeight('400')
+                            ->automaticallyResizeImagesToWidth('400')
+                            ->automaticallyResizeImagesToHeight('400')
                             ->hint('Format PNG/SVG transparan disarankan. Maks 400×400px.'),
 
                         FileUpload::make('site_favicon')
@@ -122,8 +123,8 @@ class GeneralSettings extends Page
                             ->disk('public')
                             ->directory('settings')
                             ->visibility('public')
-                            ->imageResizeTargetWidth('64')
-                            ->imageResizeTargetHeight('64')
+                            ->automaticallyResizeImagesToWidth('64')
+                            ->automaticallyResizeImagesToHeight('64')
                             ->acceptedFileTypes(['image/png', 'image/x-icon', 'image/svg+xml'])
                             ->hint('Format ICO atau PNG 64×64px.'),
                     ]),
@@ -226,6 +227,14 @@ class GeneralSettings extends Page
         $data = $this->form->getState();
 
         Setting::setMany($data);
+
+        // Sync uploaded logo/favicon to the Media Library
+        $media = app(MediaLibraryService::class);
+        foreach (['site_logo', 'site_favicon'] as $key) {
+            if (! blank($data[$key] ?? null)) {
+                $media->sync($data[$key]);
+            }
+        }
 
         Notification::make()
             ->success()

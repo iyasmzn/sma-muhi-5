@@ -59,10 +59,10 @@ class TeacherForm
                         ->disk('public')
                         ->directory('teachers')
                         ->visibility('public')
-                        ->imageResizeMode('cover')
-                        ->imageCropAspectRatio('3:4')
-                        ->imageResizeTargetWidth('300')
-                        ->imageResizeTargetHeight('400')
+                        ->automaticallyCropImagesToAspectRatio('3:4')
+                        ->automaticallyResizeImagesMode('cover')
+                        ->automaticallyResizeImagesToWidth('300')
+                        ->automaticallyResizeImagesToHeight('400')
                         ->hint('Rasio 3:4 (potret). Akan di-resize ke 300×400px.')
                         ->columnSpanFull(),
                 ]),

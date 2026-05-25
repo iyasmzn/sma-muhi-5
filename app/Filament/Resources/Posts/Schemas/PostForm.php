@@ -74,10 +74,10 @@ class PostForm
                             ->disk('public')
                             ->directory('posts/images')
                             ->visibility('public')
-                            ->imageResizeMode('cover')
-                            ->imageCropAspectRatio('16:9')
-                            ->imageResizeTargetWidth('1200')
-                            ->imageResizeTargetHeight('675')
+                            ->automaticallyCropImagesToAspectRatio('16:9')
+                            ->automaticallyResizeImagesMode('cover')
+                            ->automaticallyResizeImagesToWidth('1200')
+                            ->automaticallyResizeImagesToHeight('675')
                             ->hint('Rasio 16:9 disarankan. Akan di-resize ke 1200×675.')
                             ->columnSpanFull(),
 
