@@ -112,24 +112,32 @@
                 </div>
             </a>
 
-            {{-- Breadcrumb --}}
-            <nav aria-label="Breadcrumb" class="hidden md:flex items-center gap-1.5 text-xs" style="color:var(--muted)">
-                @stack('breadcrumb')
-            </nav>
-
             <div class="flex items-center gap-1">
                 @php
                     $pubNavItems = collect(json_decode(setting('nav_items', ''), true) ?: [
-                        ['label' => 'Beranda', 'url' => '/',      'target' => '_self', 'is_active' => true],
-                        ['label' => 'Guru',    'url' => '/guru',  'target' => '_self', 'is_active' => true],
-                        ['label' => 'Blog',    'url' => '/blog',  'target' => '_self', 'is_active' => true],
-                        ['label' => 'Kontak',  'url' => '/#kontak','target' => '_self', 'is_active' => true],
+                        ['label' => 'Beranda',  'url' => '/',         'target' => '_self', 'is_active' => true],
+                        ['label' => 'Guru',     'url' => '/guru',     'target' => '_self', 'is_active' => true],
+                        ['label' => 'Blog',     'url' => '/blog',     'target' => '_self', 'is_active' => true],
+                        ['label' => 'Unduhan',  'url' => '/unduhan',  'target' => '_self', 'is_active' => true],
+                        ['label' => 'Kontak',   'url' => '/#kontak',  'target' => '_self', 'is_active' => true],
                     ])->where('is_active', true)->values();
                 @endphp
                 @foreach($pubNavItems as $item)
-                    <a href="{{ $item['url'] }}" target="{{ $item['target'] ?? '_self' }}"
-                       class="text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-amber-50 hover:text-amber-700 transition-colors"
-                       style="color:var(--muted)">{{ $item['label'] }}</a>
+                    @php
+                        // Anchor-only links (#section) dikonversi ke /#section agar bekerja dari halaman mana pun
+                        $navUrl = str_starts_with($item['url'], '#') ? '/' . $item['url'] : $item['url'];
+
+                        // Cek apakah link ini aktif: cocokkan path URL (abaikan anchor & query)
+                        $navPath = parse_url($navUrl, PHP_URL_PATH) ?? '/';
+                        $isActive = $navPath === '/'
+                            ? request()->is('/')
+                            : request()->is(ltrim($navPath, '/'), ltrim($navPath, '/') . '/*');
+                    @endphp
+                    <a href="{{ $navUrl }}" target="{{ $item['target'] ?? '_self' }}"
+                       class="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors
+                              {{ $isActive ? 'bg-amber-50 text-amber-700 font-semibold' : 'hover:bg-amber-50 hover:text-amber-700' }}"
+                       @if($isActive) aria-current="page" @endif
+                       style="{{ $isActive ? '' : 'color:var(--muted)' }}">{{ $item['label'] }}</a>
                 @endforeach
                 @if (Route::has('login'))
                     @auth

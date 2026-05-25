@@ -193,50 +193,52 @@
                     </div>
                 </a>
 
-                {{-- Desktop nav --}}
-                <nav class="hidden lg:flex items-center gap-0.5">
-                    @foreach($navItems as $item)
-                        @php $children = collect($item['children'] ?? [])->where('is_active', true)->values(); @endphp
-                        @if($children->isNotEmpty())
-                            <div x-data="{ dropOpen: false }" class="relative">
-                                <button @mouseenter="dropOpen = true" @mouseleave="dropOpen = false"
-                                        class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1"
-                                        :class="scrolled ? 'text-gray-500 hover:bg-amber-50 hover:text-amber-700' : 'text-white/80 hover:text-white hover:bg-white/10'">
-                                    {{ $item['label'] }}
-                                    <svg class="w-3 h-3 transition-transform duration-200" :class="dropOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
-                                    </svg>
-                                </button>
-                                <div x-show="dropOpen"
-                                     x-transition:enter="transition ease-out duration-150"
-                                     x-transition:enter-start="opacity-0 -translate-y-1"
-                                     x-transition:enter-end="opacity-100 translate-y-0"
-                                     x-transition:leave="transition ease-in duration-100"
-                                     x-transition:leave-start="opacity-100 translate-y-0"
-                                     x-transition:leave-end="opacity-0 -translate-y-1"
-                                     @mouseenter="dropOpen = true" @mouseleave="dropOpen = false"
-                                     class="absolute top-full left-0 mt-1 min-w-48 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50 py-1">
-                                    @foreach($children as $child)
-                                        <a href="{{ $child['url'] }}" target="{{ $child['target'] ?? '_self' }}"
-                                           class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-amber-50 hover:text-amber-700 transition-colors">
-                                            <span class="w-1 h-1 rounded-full bg-amber-400 shrink-0"></span>
-                                            {{ $child['label'] }}
-                                        </a>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @else
-                            <a href="{{ $item['url'] }}" target="{{ $item['target'] ?? '_self' }}"
-                               class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-                               :class="scrolled ? 'text-gray-500 hover:bg-amber-50 hover:text-amber-700' : 'text-white/80 hover:text-white hover:bg-white/10'">
-                                {{ $item['label'] }}
-                            </a>
-                        @endif
-                    @endforeach
-                </nav>
-
-                {{-- Right: auth + hamburger --}}
+                {{-- Right: nav links + auth + hamburger --}}
                 <div class="flex items-center gap-2">
+
+                    {{-- Desktop nav --}}
+                    <nav class="hidden lg:flex items-center gap-0.5">
+                        @foreach($navItems as $item)
+                            @php $children = collect($item['children'] ?? [])->where('is_active', true)->values(); @endphp
+                            @if($children->isNotEmpty())
+                                <div x-data="{ dropOpen: false }" class="relative">
+                                    <button @mouseenter="dropOpen = true" @mouseleave="dropOpen = false"
+                                            class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1"
+                                            :class="scrolled ? 'text-gray-500 hover:bg-amber-50 hover:text-amber-700' : 'text-white/80 hover:text-white hover:bg-white/10'">
+                                        {{ $item['label'] }}
+                                        <svg class="w-3 h-3 transition-transform duration-200" :class="dropOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </button>
+                                    <div x-show="dropOpen"
+                                         x-transition:enter="transition ease-out duration-150"
+                                         x-transition:enter-start="opacity-0 -translate-y-1"
+                                         x-transition:enter-end="opacity-100 translate-y-0"
+                                         x-transition:leave="transition ease-in duration-100"
+                                         x-transition:leave-start="opacity-100 translate-y-0"
+                                         x-transition:leave-end="opacity-0 -translate-y-1"
+                                         @mouseenter="dropOpen = true" @mouseleave="dropOpen = false"
+                                         class="absolute top-full left-0 mt-1 min-w-48 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50 py-1">
+                                        @foreach($children as $child)
+                                            <a href="{{ $child['url'] }}" target="{{ $child['target'] ?? '_self' }}"
+                                               class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-amber-50 hover:text-amber-700 transition-colors">
+                                                <span class="w-1 h-1 rounded-full bg-amber-400 shrink-0"></span>
+                                                {{ $child['label'] }}
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <a href="{{ $item['url'] }}" target="{{ $item['target'] ?? '_self' }}"
+                                   class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                                   :class="scrolled ? 'text-gray-500 hover:bg-amber-50 hover:text-amber-700' : 'text-white/80 hover:text-white hover:bg-white/10'">
+                                    {{ $item['label'] }}
+                                </a>
+                            @endif
+                        @endforeach
+                    </nav>
+
+                    {{-- Auth + hamburger --}}
                     @if (Route::has('login'))
                         @auth
                             <a href="{{ url('/dashboard') }}" class="btn-primary text-xs hidden sm:inline-flex">

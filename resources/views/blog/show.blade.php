@@ -38,13 +38,6 @@
 </script>
 @endpush
 
-@push('breadcrumb')
-    <a href="/" class="hover:text-amber-600 transition-colors">Beranda</a>
-    <svg class="w-3 h-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-    <a href="{{ route('blog.index') }}" class="hover:text-amber-600 transition-colors">Blog</a>
-    <svg class="w-3 h-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-    <span class="text-amber-600 font-medium truncate max-w-48">{{ $post->title }}</span>
-@endpush
 
 @push('head')
 <style>
