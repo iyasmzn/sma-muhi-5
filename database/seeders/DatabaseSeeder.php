@@ -15,17 +15,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        if (! User::where('email', 'admin@smamuh5.sch.id')->exists()) {
+            User::factory()->create([
+                'name'  => 'Administrator',
+                'email' => 'admin@smamuh5.sch.id',
+            ]);
+        }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-
+        $this->call(SettingSeeder::class);
         $this->call(StatSeeder::class);
         $this->call(TeacherSeeder::class);
         $this->call(SlideSeeder::class);
         $this->call(ContactItemSeeder::class);
         $this->call(StaticPageSeeder::class);
+        $this->call(PostSeeder::class);
+        $this->call(TestimonialSeeder::class);
+        $this->call(DownloadSeeder::class);
+        $this->call(ShieldSeeder::class);
     }
 }
