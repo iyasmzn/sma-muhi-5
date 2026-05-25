@@ -186,7 +186,7 @@
 </head>
 
 <body class="min-h-screen antialiased"
-      x-data="{ scrolled: false }"
+      x-data="{ scrolled: false, mobileOpen: false }"
       x-init="window.addEventListener('scroll', () => scrolled = window.scrollY > 40, { passive: true })">
 
     {{-- ── Navbar — frosted glass on scroll ─────────────────────── --}}
@@ -211,7 +211,7 @@
                         <span class="text-white font-extrabold text-sm">{{ strtoupper(substr(setting('site_name', config('app.name', 'S')), 0, 1)) }}</span>
                     </div>
                 @endif
-                <div class="hidden sm:block leading-tight">
+                <div class="leading-tight">
                     <div class="font-bold text-sm" style="color:var(--text)">{{ setting('site_name', config('app.name')) }}</div>
                     <div class="text-[10px] font-semibold uppercase tracking-widest text-amber-600">{{ setting('site_tagline', 'Unggul · Berkarakter') }}</div>
                 </div>
@@ -249,14 +249,112 @@
 
                 @if (Route::has('login'))
                     @auth
-                        <a href="{{ url('/dashboard') }}" class="btn-primary text-sm ml-1">Dashboard</a>
+                        <a href="{{ url('/dashboard') }}" class="btn-primary text-sm ml-1 hidden sm:inline-flex">Dashboard</a>
                     @else
                         <a href="{{ route('login') }}" class="btn-outline text-sm ml-1 hidden sm:inline-flex">Masuk</a>
                     @endauth
                 @endif
+
+                {{-- Hamburger (mobile) --}}
+                <button @click="mobileOpen = !mobileOpen"
+                        class="sm:hidden w-9 h-9 rounded-lg flex flex-col items-center justify-center gap-1.5 hover:bg-black/5 transition-colors ml-1"
+                        :aria-expanded="mobileOpen" aria-label="Toggle menu">
+                    <span class="w-5 h-0.5 bg-gray-700 rounded transition-all duration-200"
+                          :class="mobileOpen ? 'rotate-45 translate-y-2' : ''"></span>
+                    <span class="w-5 h-0.5 bg-gray-700 rounded transition-all duration-200"
+                          :class="mobileOpen ? 'opacity-0' : ''"></span>
+                    <span class="w-5 h-0.5 bg-gray-700 rounded transition-all duration-200"
+                          :class="mobileOpen ? '-rotate-45 -translate-y-2' : ''"></span>
+                </button>
             </div>
         </div>
     </header>
+
+    {{-- ── Mobile Menu Overlay ──────────────────────────────── --}}
+    <div x-show="mobileOpen"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 -translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-2"
+         class="sm:hidden fixed inset-0 z-40 flex flex-col"
+         style="background:rgba(245,245,247,0.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)">
+
+        {{-- Top bar: logo + close --}}
+        <div class="flex items-center justify-between px-5 py-4 border-b"
+             style="border-color:var(--border)">
+            <a href="/" @click="mobileOpen = false" class="flex items-center gap-3">
+                @if(setting('site_logo'))
+                    <img src="{{ asset('storage/' . setting('site_logo')) }}"
+                         alt="{{ setting('site_name', config('app.name')) }}"
+                         class="w-9 h-9 rounded-2xl object-contain">
+                @else
+                    <div class="w-9 h-9 rounded-2xl flex items-center justify-center shadow-sm"
+                         style="background:var(--primary)">
+                        <span class="text-white font-extrabold text-sm">{{ strtoupper(substr(setting('site_name', config('app.name', 'S')), 0, 1)) }}</span>
+                    </div>
+                @endif
+                <div class="leading-tight">
+                    <div class="font-bold text-sm" style="color:var(--text)">{{ setting('site_name', config('app.name')) }}</div>
+                    <div class="text-[10px] font-semibold uppercase tracking-widest text-amber-600">{{ setting('site_tagline', 'Unggul · Berkarakter') }}</div>
+                </div>
+            </a>
+            <button @click="mobileOpen = false"
+                    class="w-9 h-9 rounded-xl border flex items-center justify-center transition-colors hover:bg-black/5"
+                    style="border-color:var(--border)">
+                <svg class="w-5 h-5" style="color:var(--muted)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        {{-- Nav items --}}
+        <nav class="flex-1 overflow-y-auto px-5 py-6 flex flex-col gap-1">
+            @php
+                $mobileNavItems = collect(json_decode(setting('nav_items', ''), true) ?: [
+                    ['label' => 'Beranda',  'url' => '/',         'target' => '_self', 'is_active' => true],
+                    ['label' => 'Guru',     'url' => '/guru',     'target' => '_self', 'is_active' => true],
+                    ['label' => 'Blog',     'url' => '/blog',     'target' => '_self', 'is_active' => true],
+                    ['label' => 'Unduhan',  'url' => '/unduhan',  'target' => '_self', 'is_active' => true],
+                    ['label' => 'Kontak',   'url' => '/#kontak',  'target' => '_self', 'is_active' => true],
+                ])->where('is_active', true)->values();
+            @endphp
+            @foreach($mobileNavItems as $i => $item)
+                @php
+                    $mobileUrl = str_starts_with($item['url'], '#') ? '/' . $item['url'] : $item['url'];
+                    $mobilePath = parse_url($mobileUrl, PHP_URL_PATH) ?? '/';
+                    $isMobileActive = $mobilePath === '/'
+                        ? request()->is('/')
+                        : request()->is(ltrim($mobilePath, '/'), ltrim($mobilePath, '/') . '/*');
+                @endphp
+                <a href="{{ $mobileUrl }}" target="{{ $item['target'] ?? '_self' }}"
+                   @click="mobileOpen = false"
+                   class="group flex items-center gap-4 py-4 border-b transition-all duration-200"
+                   style="border-color:var(--border)">
+                    <span class="text-xs font-bold w-6 shrink-0 transition-colors"
+                          style="{{ $isMobileActive ? 'color:var(--primary)' : 'color:rgba(0,0,0,.2)' }}">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                    <span class="text-xl font-bold transition-colors flex-1"
+                          style="{{ $isMobileActive ? 'color:var(--primary)' : 'color:var(--text)' }}">{{ $item['label'] }}</span>
+                    <svg class="w-4 h-4 shrink-0 transition-all group-hover:translate-x-1 duration-200"
+                         style="color:rgba(0,0,0,.2)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            @endforeach
+        </nav>
+
+        {{-- Auth button at bottom --}}
+        @if (Route::has('login'))
+            <div class="px-5 py-5 border-t shrink-0" style="border-color:var(--border)">
+                @auth
+                    <a href="{{ url('/dashboard') }}" @click="mobileOpen = false" class="btn-primary w-full justify-center">Dashboard</a>
+                @else
+                    <a href="{{ route('login') }}" @click="mobileOpen = false" class="btn-outline w-full justify-center">Masuk</a>
+                @endauth
+            </div>
+        @endif
+    </div>
 
     {{-- ── Page Content ─────────────────────────────────────── --}}
     <main>
