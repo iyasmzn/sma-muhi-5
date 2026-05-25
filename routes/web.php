@@ -3,6 +3,7 @@
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\SpmbController;
 use App\Http\Controllers\StaticPageController;
 use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,10 @@ Route::get('/guru/{teacher}', [TeacherController::class, 'show'])->name('teacher
 
 // Halaman Statis
 Route::get('/page/{slug}', [StaticPageController::class, 'show'])->name('page.show');
+
+// PPDB / SPMB
+Route::get('/ppdb', [SpmbController::class, 'index'])->name('ppdb.index');
+Route::post('/ppdb', [SpmbController::class, 'store'])->name('ppdb.store');
 
 // Unduhan
 Route::get('/unduhan', [DownloadController::class, 'index'])->name('downloads.index');

@@ -1,3 +1,13 @@
+@php
+    $spmbYear      = setting('spmb_year', '2026/2027');
+    $cardTitle     = setting('spmb_card_title', 'SPMB Tahun Ajaran {year} Dibuka!');
+    $cardTitle     = str_replace('{year}', $spmbYear, $cardTitle);
+    $cardDesc      = setting('spmb_card_description', 'Pendaftaran peserta didik baru resmi dibuka. Tersedia jalur Prestasi, Zonasi, dan Afirmasi. Segera lengkapi berkas dan daftarkan diri Anda sebelum batas waktu.');
+    $ctaLabel      = setting('spmb_card_cta_label', 'Daftar Sekarang');
+    $ctaUrl        = setting('spmb_card_cta_url', '/ppdb');
+    $secondaryLabel = setting('spmb_card_secondary_label', 'Info Selengkapnya');
+@endphp
+
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <section id="spmb" class="mb-6" data-aos="fade-up">
         <div class="rounded-2xl overflow-hidden border border-amber-200"
@@ -9,20 +19,20 @@
                         Penerimaan Peserta Didik Baru
                     </div>
                     <h2 class="text-2xl sm:text-3xl font-extrabold text-amber-900 leading-snug mb-3">
-                        SPMB Tahun Ajaran<br>{{ setting('spmb_year', '2026/2027') }} Dibuka!
+                        {!! nl2br(e($cardTitle)) !!}
                     </h2>
                     <p class="text-amber-800/80 text-sm leading-relaxed mb-6">
-                        Pendaftaran peserta didik baru resmi dibuka. Tersedia jalur Prestasi, Zonasi, dan Afirmasi. Segera lengkapi berkas dan daftarkan diri Anda sebelum batas waktu.
+                        {{ $cardDesc }}
                     </p>
                     <div class="flex flex-wrap gap-3">
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="btn-primary text-sm">
-                                Daftar Sekarang
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-                            </a>
-                        @endif
-                        <a href="#" class="btn-outline border-amber-300 text-amber-900 bg-transparent hover:bg-amber-100 text-sm">
-                            Unduh Panduan
+                        <a href="{{ $ctaUrl }}"
+                           class="btn-primary text-sm">
+                            {{ $ctaLabel }}
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                        </a>
+                        <a href="{{ route('ppdb.index') }}"
+                           class="btn-outline border-amber-300 text-amber-900 bg-transparent hover:bg-amber-100 text-sm">
+                            {{ $secondaryLabel }}
                         </a>
                     </div>
                 </div>
@@ -42,6 +52,11 @@
                                 </div>
                             @endforeach
                         </div>
+                        <a href="{{ route('ppdb.index') }}"
+                           class="mt-5 inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:text-amber-900 transition-colors">
+                            Lihat semua info PPDB
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                        </a>
                     </div>
                 </div>
             </div>
