@@ -52,6 +52,7 @@ class GeneralSettings extends Page
             'contact_phone' => Setting::get('contact_phone'),
             'contact_email' => Setting::get('contact_email'),
             'contact_hours' => Setting::get('contact_hours', 'Senin–Jumat, 07.00–15.30 WIB'),
+            'contact_map_url' => Setting::get('contact_map_url'),
 
             // SPMB
             'spmb_year' => Setting::get('spmb_year', '2026/2027'),
@@ -155,6 +156,14 @@ class GeneralSettings extends Page
                     TextInput::make('contact_hours')
                         ->label('Jam Operasional')
                         ->placeholder('Senin–Jumat, 07.00–15.30 WIB')
+                        ->columnSpanFull(),
+
+                    TextInput::make('contact_map_url')
+                        ->label('URL Embed Google Maps')
+                        ->url()
+                        ->placeholder('https://www.google.com/maps/embed?pb=...')
+                        ->hint('Buka Google Maps → Bagikan → Sematkan peta → Salin URL dari atribut src.')
+                        ->helperText('Hanya URL dari google.com/maps/embed yang diterima.')
                         ->columnSpanFull(),
                 ]),
 
