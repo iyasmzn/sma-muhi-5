@@ -1,2 +1,7 @@
 User-agent: *
-Disallow:
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /login
+Disallow: /register
+Disallow: /filament
+Disallow: /livewire
