@@ -5,7 +5,7 @@
         <div class="flex items-end justify-between gap-6 mb-14" data-aos="fade-up">
             <div>
                 <div class="fi-label mb-3">Foto & Video</div>
-                <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight" style="color:var(--text)">Galeri Sekolah</h2>
+                <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight" style="color:var(--text)">Galeri & Kegiatan Sekolah</h2>
                 <p class="mt-2 text-base max-w-md leading-relaxed" style="color:var(--muted)">
                     Momen-momen berharga dari kehidupan sekolah kami.
                 </p>

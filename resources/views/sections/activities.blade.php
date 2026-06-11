@@ -5,9 +5,9 @@
         <div class="flex items-end justify-between gap-6 mb-14" data-aos="fade-up">
             <div>
                 <div class="fi-label mb-3">Ekstrakurikuler & Acara</div>
-                <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight" style="color:var(--text)">Kegiatan Sekolah</h2>
+                <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight" style="color:var(--text)">Program Sekolah</h2>
                 <p class="mt-2 text-base max-w-md leading-relaxed" style="color:var(--muted)">
-                    Berbagai kegiatan unggulan yang membentuk karakter dan prestasi siswa.
+                    Berbagai program unggulan yang membentuk karakter dan prestasi siswa.
                 </p>
             </div>
             <a href="#" class="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold transition-colors hover:opacity-75"
