@@ -5,8 +5,9 @@
     /* ── Hero ─────────────────────────────────────────────── */
     .page-hero {
         position: relative;
+        margin-top: -4rem;
         background: linear-gradient(135deg, #78350f 0%, #92400e 40%, #b45309 70%, #d97706 100%);
-        padding: 6rem 0 3.5rem;
+        padding: 9.5rem 0 3.5rem;
         overflow: hidden;
     }
     .page-hero::before {

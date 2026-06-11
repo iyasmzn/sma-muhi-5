@@ -56,11 +56,13 @@
     /* Hero */
     .article-hero {
         position: relative;
-        height: 20rem;
+        margin-top: -4rem;
+        height: 24rem;
+        padding-top: 4rem;
         overflow: hidden;
     }
-    @media(min-width: 640px) { .article-hero { height: 26rem; } }
-    @media(min-width: 1024px) { .article-hero { height: 32rem; } }
+    @media(min-width: 640px) { .article-hero { height: 30rem; } }
+    @media(min-width: 1024px) { .article-hero { height: 36rem; } }
 
     .article-hero img {
         width: 100%;

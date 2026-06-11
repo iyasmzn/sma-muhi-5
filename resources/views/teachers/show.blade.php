@@ -84,16 +84,21 @@
 
 @section('content')
 
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    {{-- ── Hero band — dark backing for the transparent header ──── --}}
+    <section class="-mt-17 pt-26 pb-8 sm:pt-30 sm:pb-10"
+             style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 40%,#0c1a0f 100%)">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav aria-label="Breadcrumb" class="flex items-center gap-1.5 text-xs text-white/50">
+                <a href="/" class="hover:text-white transition-colors">Beranda</a>
+                <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                <a href="{{ route('teachers.index') }}" class="hover:text-white transition-colors">Tenaga Pendidik</a>
+                <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                <span class="text-amber-400 font-medium truncate max-w-40">{{ $teacher->name }}</span>
+            </nav>
+        </div>
+    </section>
 
-        {{-- ── Breadcrumb mobile ──────────────────────────── --}}
-        <nav aria-label="Breadcrumb" class="md:hidden flex items-center gap-1.5 text-xs mb-6 text-gray-400">
-            <a href="/" class="hover:text-amber-600 transition-colors">Beranda</a>
-            <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            <a href="{{ route('teachers.index') }}" class="hover:text-amber-600 transition-colors">Tenaga Pendidik</a>
-            <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            <span class="text-amber-600 truncate max-w-32">{{ $teacher->name }}</span>
-        </nav>
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
         {{-- ── Main Card ────────────────────────────────────── --}}
         <div class="fi-card overflow-hidden" data-aos="fade-up" itemscope itemtype="https://schema.org/Person">
