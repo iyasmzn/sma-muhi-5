@@ -13,6 +13,11 @@
         <priority>0.9</priority>
     </url>
     <url>
+        <loc>{{ route('programs.index') }}</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
         <loc>{{ route('teachers.index') }}</loc>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
@@ -45,6 +50,16 @@
         <lastmod>{{ $post->updated_at->toAtomString() }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+    </url>
+    @endforeach
+
+    {{-- ── Programs ────────────────────────────────────────── --}}
+    @foreach($programs as $program)
+    <url>
+        <loc>{{ route('programs.show', $program->slug) }}</loc>
+        <lastmod>{{ $program->updated_at->toAtomString() }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
     </url>
     @endforeach
 

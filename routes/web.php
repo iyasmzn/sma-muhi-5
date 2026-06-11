@@ -3,6 +3,7 @@
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SpmbController;
 use App\Http\Controllers\StaticPageController;
@@ -16,6 +17,10 @@ Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 // Blog
 Route::get('/blog', [PostController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [PostController::class, 'show'])->name('blog.show');
+
+// Program Sekolah
+Route::get('/program', [ProgramController::class, 'index'])->name('programs.index');
+Route::get('/program/{slug}', [ProgramController::class, 'show'])->name('programs.show');
 
 // Tenaga Pendidik
 Route::get('/guru', [TeacherController::class, 'index'])->name('teachers.index');

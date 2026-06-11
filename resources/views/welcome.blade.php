@@ -228,6 +228,7 @@
         ['label' => 'Profil',   'url' => '#profil',   'target' => '_self', 'is_active' => true, 'children' => []],
         ['label' => 'SPMB',     'url' => '#spmb',     'target' => '_self', 'is_active' => true, 'children' => []],
         ['label' => 'Akademik', 'url' => '#akademik', 'target' => '_self', 'is_active' => true, 'children' => []],
+        ['label' => 'Program',  'url' => '/program',  'target' => '_self', 'is_active' => true, 'children' => []],
         ['label' => 'Guru',     'url' => '/guru',     'target' => '_self', 'is_active' => true, 'children' => []],
         ['label' => 'Blog',     'url' => '/blog',     'target' => '_self', 'is_active' => true, 'children' => []],
         ['label' => 'Kontak',   'url' => '#kontak',   'target' => '_self', 'is_active' => true, 'children' => []],
@@ -240,13 +241,35 @@
         ['key' => 'section_stats',       'visible' => true],
         ['key' => 'section_principal',   'visible' => true],
         ['key' => 'section_spmb_steps',  'visible' => true],
-        ['key' => 'section_activities',  'visible' => true],
+        ['key' => 'section_programs',    'visible' => true],
         ['key' => 'section_gallery',     'visible' => true],
         ['key' => 'section_blog',        'visible' => true],
         ['key' => 'section_contact',     'visible' => true],
     ];
 
     $sectionOrder = json_decode(setting('section_order', ''), true) ?: $defaultSectionOrder;
+
+    // Reconcile a previously saved order with the current set of sections:
+    // the retired "activities" section is replaced by "programs" in place.
+    $reconciled = [];
+    $seenKeys = [];
+    foreach ($sectionOrder as $entry) {
+        $key = ($entry['key'] ?? null) === 'section_activities' ? 'section_programs' : ($entry['key'] ?? null);
+        if (! $key || in_array($key, $seenKeys, true)) {
+            continue;
+        }
+        $entry['key'] = $key;
+        $reconciled[] = $entry;
+        $seenKeys[] = $key;
+    }
+    // Append any newly introduced sections missing from the saved order.
+    foreach ($defaultSectionOrder as $defaultSection) {
+        if (! in_array($defaultSection['key'], $seenKeys, true)) {
+            $reconciled[] = $defaultSection;
+            $seenKeys[] = $defaultSection['key'];
+        }
+    }
+    $sectionOrder = $reconciled;
 
     $sectionPartials = [
         'section_hero'        => 'sections.hero',
@@ -255,7 +278,7 @@
         'section_stats'       => 'sections.stats',
         'section_principal'   => 'sections.principal',
         'section_spmb_steps'  => 'sections.spmb-steps',
-        'section_activities'  => 'sections.activities',
+        'section_programs'    => 'sections.programs',
         'section_gallery'     => 'sections.gallery',
         'section_blog'        => 'sections.blog',
         'section_contact'     => 'sections.contact',

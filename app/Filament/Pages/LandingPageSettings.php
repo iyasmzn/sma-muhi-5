@@ -42,11 +42,59 @@ class LandingPageSettings extends Page
             ['key' => 'section_stats',       'label' => '📊  Statistik Sekolah',         'visible' => true],
             ['key' => 'section_principal',   'label' => '👨‍💼  Sambutan Kepala Sekolah', 'visible' => true],
             ['key' => 'section_spmb_steps',  'label' => '📝  Tahapan SPMB',             'visible' => true],
-            ['key' => 'section_activities',  'label' => '⚽  Kegiatan & Ekskul',         'visible' => true],
+            ['key' => 'section_programs',    'label' => '🎓  Program Sekolah',          'visible' => true],
             ['key' => 'section_gallery',     'label' => '🖼️  Galeri Foto',              'visible' => true],
             ['key' => 'section_blog',        'label' => '📰  Blog & Berita',             'visible' => true],
             ['key' => 'section_contact',     'label' => '📍  Lokasi & Peta',             'visible' => true],
         ];
+    }
+
+    /**
+     * Reconcile a stored section order with the current set of known sections:
+     * replace the retired "activities" section with "programs" in place,
+     * drop unknown keys, refresh labels, and append any newly added sections.
+     *
+     * @param  array<int, array{key: string, label?: string, visible?: bool}>  $sections
+     * @return array<int, array{key: string, label: string, visible: bool}>
+     */
+    private static function normalizeSections(array $sections): array
+    {
+        $labelMap = collect(self::defaultSections())->keyBy('key');
+
+        $normalized = [];
+        $seenKeys = [];
+
+        foreach ($sections as $section) {
+            $key = $section['key'] ?? null;
+            $visible = $section['visible'] ?? true;
+
+            // The activities section was retired in favour of programs.
+            if ($key === 'section_activities') {
+                $key = 'section_programs';
+            }
+
+            // Skip unknown or duplicate keys.
+            if (! $labelMap->has($key) || in_array($key, $seenKeys, true)) {
+                continue;
+            }
+
+            $normalized[] = [
+                'key' => $key,
+                'label' => $labelMap->get($key)['label'],
+                'visible' => $visible,
+            ];
+            $seenKeys[] = $key;
+        }
+
+        // Append any newly introduced sections not yet present.
+        foreach (self::defaultSections() as $default) {
+            if (! in_array($default['key'], $seenKeys, true)) {
+                $normalized[] = $default;
+                $seenKeys[] = $default['key'];
+            }
+        }
+
+        return $normalized;
     }
 
     public function mount(): void
@@ -56,13 +104,7 @@ class LandingPageSettings extends Page
             ? (json_decode($saved, true) ?: self::defaultSections())
             : self::defaultSections();
 
-        // Ensure label is always present (in case old data lacked it)
-        $labelMap = collect(self::defaultSections())->keyBy('key');
-        $sections = array_map(function (array $section) use ($labelMap): array {
-            $section['label'] = $labelMap->get($section['key'])['label'] ?? $section['key'];
-
-            return $section;
-        }, $sections);
+        $sections = self::normalizeSections($sections);
 
         $this->form->fill(['sections' => $sections]);
     }

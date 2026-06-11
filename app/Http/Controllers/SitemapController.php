@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Program;
 use App\Models\StaticPage;
 use App\Models\Teacher;
 use Illuminate\Http\Response;
@@ -42,7 +43,12 @@ class SitemapController extends Controller
             ->ordered()
             ->get();
 
-        $content = view('sitemap.index', compact('posts', 'teachers', 'staticPages'))->render();
+        $programs = Program::published()
+            ->select('slug', 'updated_at')
+            ->ordered()
+            ->get();
+
+        $content = view('sitemap.index', compact('posts', 'teachers', 'staticPages', 'programs'))->render();
 
         return response($content, 200, ['Content-Type' => 'application/xml']);
     }
