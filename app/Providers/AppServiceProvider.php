@@ -8,7 +8,10 @@ use App\Models\Teacher;
 use App\Observers\PostObserver;
 use App\Observers\SlideObserver;
 use App\Observers\TeacherObserver;
+use Filament\Support\Assets\Js;
+use Filament\Support\Facades\FilamentAsset;
 use Filament\Tables\Columns\ImageColumn;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -35,5 +38,10 @@ class AppServiceProvider extends ServiceProvider
         Slide::observe(SlideObserver::class);
         Teacher::observe(TeacherObserver::class);
         Post::observe(PostObserver::class);
+
+        // ── Chart.js plugin: tampilkan angka di dalam slice pie ──────────────────────────────
+        FilamentAsset::register([
+            Js::make('chart-js-plugins', Vite::asset('resources/js/filament-chart-js-plugins.js'))->module(),
+        ]);
     }
 }
