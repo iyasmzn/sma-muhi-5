@@ -149,12 +149,7 @@ class SettingSeeder extends Seeder
         ];
 
         return [
-            // Jadwal & status
-            'spmb_year' => '2026/2027',
-            'spmb_open' => 1,
-            'spmb_deadline' => '30 Mei',
-            'spmb_select' => '10 Juni',
-            'spmb_announce' => '25 Juni',
+            // Jadwal & status (tahun ajaran, gelombang, dan tanggal seleksi/pengumuman kini dari master Tahun Ajaran & Gelombang)
 
             // Kartu di halaman depan
             'spmb_card_title' => 'SPMB Tahun Ajaran {year} Dibuka!',

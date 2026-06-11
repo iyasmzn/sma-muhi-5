@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SpmbRegistrations\Tables;
 
+use App\Models\AcademicYear;
 use App\Models\SpmbRegistration;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -22,21 +23,34 @@ class SpmbRegistrationsTable
                     ->sortable()
                     ->description(fn (SpmbRegistration $record): string => $record->previous_school),
 
+                TextColumn::make('nik')
+                    ->label('NIK')
+                    ->searchable()
+                    ->toggleable()
+                    ->placeholder('—'),
+
                 TextColumn::make('phone')
                     ->label('No. HP')
                     ->searchable(),
 
-                TextColumn::make('jalur')
+                TextColumn::make('admissionPath.name')
                     ->label('Jalur')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'zonasi' => 'info',
-                        'prestasi' => 'success',
-                        'afirmasi' => 'warning',
-                        'mutasi' => 'gray',
-                        default => 'gray',
-                    })
-                    ->formatStateUsing(fn (string $state): string => SpmbRegistration::jalurOptions()[$state] ?? $state),
+                    ->color(fn (SpmbRegistration $record): string => $record->admissionPath?->color ?? 'gray')
+                    ->formatStateUsing(fn (?string $state, SpmbRegistration $record): string => trim(($record->admissionPath?->icon ?? '').' '.($state ?? '—')))
+                    ->placeholder('—'),
+
+                TextColumn::make('academicYear.label')
+                    ->label('Tahun Ajaran')
+                    ->state(fn (SpmbRegistration $record): ?string => $record->academicYear?->label)
+                    ->badge()
+                    ->color('gray')
+                    ->toggleable(),
+
+                TextColumn::make('registrationWave.name')
+                    ->label('Gelombang')
+                    ->toggleable()
+                    ->placeholder('—'),
 
                 TextColumn::make('status')
                     ->label('Status')
@@ -57,9 +71,20 @@ class SpmbRegistrationsTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                SelectFilter::make('jalur')
+                SelectFilter::make('academic_year_id')
+                    ->label('Tahun Ajaran')
+                    ->relationship('academicYear', 'year_start')
+                    ->getOptionLabelFromRecordUsing(fn (AcademicYear $record): string => $record->label)
+                    ->native(false),
+
+                SelectFilter::make('registration_wave_id')
+                    ->label('Gelombang')
+                    ->relationship('registrationWave', 'name')
+                    ->native(false),
+
+                SelectFilter::make('admission_path_id')
                     ->label('Jalur')
-                    ->options(SpmbRegistration::jalurOptions())
+                    ->relationship('admissionPath', 'name')
                     ->native(false),
 
                 SelectFilter::make('status')

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\SpmbRegistrations\Schemas;
 
+use App\Models\AcademicYear;
+use App\Models\AdmissionPath;
 use App\Models\SpmbRegistration;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -9,13 +11,48 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 class SpmbRegistrationForm
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
+
+            Section::make('Pendaftaran')
+                ->icon('heroicon-o-clipboard-document-list')
+                ->schema([
+                    Grid::make(3)->schema([
+                        Select::make('academic_year_id')
+                            ->label('Tahun Ajaran')
+                            ->relationship('academicYear', 'year_start')
+                            ->getOptionLabelFromRecordUsing(fn (AcademicYear $record): string => $record->label)
+                            ->required()
+                            ->native(false)
+                            ->live()
+                            ->afterStateUpdated(fn (Set $set) => $set('registration_wave_id', null)),
+
+                        Select::make('registration_wave_id')
+                            ->label('Gelombang')
+                            ->relationship(
+                                'registrationWave',
+                                'name',
+                                modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('academic_year_id', $get('academic_year_id')),
+                            )
+                            ->native(false)
+                            ->disabled(fn (Get $get): bool => blank($get('academic_year_id'))),
+
+                        Select::make('admission_path_id')
+                            ->label('Jalur Pendaftaran')
+                            ->relationship('admissionPath', 'name', fn (Builder $query) => $query->orderBy('sort_order'))
+                            ->getOptionLabelFromRecordUsing(fn (AdmissionPath $record): string => trim("{$record->icon} {$record->name}"))
+                            ->required()
+                            ->native(false),
+                    ]),
+                ]),
 
             Section::make('Data Pribadi Calon Peserta')
                 ->icon('heroicon-o-user')
@@ -25,6 +62,13 @@ class SpmbRegistrationForm
                             ->label('Nama Lengkap')
                             ->required()
                             ->maxLength(100),
+
+                        TextInput::make('nik')
+                            ->label('NIK')
+                            ->numeric()
+                            ->length(16)
+                            ->unique(ignoreRecord: true)
+                            ->helperText('Nomor Induk Kependudukan, 16 digit.'),
 
                         TextInput::make('phone')
                             ->label('No. HP / WhatsApp')
@@ -45,17 +89,9 @@ class SpmbRegistrationForm
                             ->displayFormat('d/m/Y'),
                     ]),
 
-                    Grid::make(2)->schema([
-                        TextInput::make('birth_place')
-                            ->label('Tempat Lahir')
-                            ->maxLength(100),
-
-                        Select::make('jalur')
-                            ->label('Jalur Pendaftaran')
-                            ->options(SpmbRegistration::jalurOptions())
-                            ->required()
-                            ->native(false),
-                    ]),
+                    TextInput::make('birth_place')
+                        ->label('Tempat Lahir')
+                        ->maxLength(100),
 
                     Textarea::make('address')
                         ->label('Alamat Lengkap')

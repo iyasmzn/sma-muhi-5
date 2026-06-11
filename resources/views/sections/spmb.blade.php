@@ -1,11 +1,20 @@
 @php
-    $spmbYear       = setting('spmb_year', '2026/2027');
+    $wave = spmb_current_wave();
+@endphp
+
+{{-- Section hanya tampil saat ada gelombang pendaftaran yang sedang dibuka --}}
+@if($wave)
+@php
+    $spmbYear       = spmb_year_label();
     $cardTitle      = setting('spmb_card_title', 'SPMB Tahun Ajaran {year} Dibuka!');
     $cardTitle      = str_replace('{year}', $spmbYear, $cardTitle);
     $cardDesc       = setting('spmb_card_description', 'Pendaftaran peserta didik baru resmi dibuka. Tersedia jalur Prestasi, Zonasi, dan Afirmasi. Segera lengkapi berkas dan daftarkan diri Anda sebelum batas waktu.');
     $ctaLabel       = setting('spmb_card_cta_label', 'Daftar Sekarang');
     $ctaUrl         = setting('spmb_card_cta_url', '/ppdb');
     $secondaryLabel = setting('spmb_card_secondary_label', 'Info Selengkapnya');
+    $fmtDate        = fn ($d) => $d ? $d->locale('id')->translatedFormat('d M Y') : '—';
+    $waveStart      = $fmtDate($wave->start_date);
+    $waveEnd        = $fmtDate($wave->end_date);
 @endphp
 
 <section id="spmb" class="py-8 sm:py-12">
@@ -40,6 +49,16 @@
                     <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight tracking-tight mb-4 text-white">
                         {!! nl2br(e($cardTitle)) !!}
                     </h2>
+
+                    {{-- Gelombang yang sedang dibuka --}}
+                    <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-xl mb-5 text-white"
+                         style="border:1px solid rgba(255,255,255,.20); background:rgba(255,255,255,.10); backdrop-filter:blur(6px);">
+                        <span class="text-lg">🗓️</span>
+                        <div class="leading-tight">
+                            <div class="text-sm font-bold">{{ $wave->name }} dibuka</div>
+                            <div class="text-[11px] text-white/70 font-medium">{{ $waveStart }} – {{ $waveEnd }}</div>
+                        </div>
+                    </div>
                     <p class="text-base leading-relaxed mb-8 text-white/75">
                         {{ $cardDesc }}
                     </p>
@@ -66,9 +85,9 @@
                         <div class="text-8xl mb-6 drop-shadow-lg">🎓</div>
                         <div class="grid grid-cols-3 gap-4 text-center">
                             @foreach([
-                                [setting('spmb_deadline', '30 Mei'), 'Batas Daftar'],
-                                [setting('spmb_select', '10 Juni'), 'Seleksi'],
-                                [setting('spmb_announce', '25 Juni'), 'Pengumuman'],
+                                [$fmtDate($wave->end_date), 'Batas Daftar'],
+                                [$fmtDate($wave->selection_date), 'Seleksi'],
+                                [$fmtDate($wave->announcement_date), 'Pengumuman'],
                             ] as [$d, $l])
                                 <div class="rounded-2xl p-4 transition-transform hover:-translate-y-1"
                                      style="background:rgba(255,255,255,.10);
@@ -92,3 +111,4 @@
         </div>
     </div>
 </section>
+@endif
