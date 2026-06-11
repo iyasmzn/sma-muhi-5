@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ContactItem;
 use App\Models\Post;
 use App\Models\Slide;
 use App\Models\Stat;
@@ -20,7 +19,6 @@ class HomeController extends Controller
 
         $stats = Stat::ordered()->get();
         $slides = Slide::active()->get();
-        $contactItems = ContactItem::active()->get();
 
         $siteName = setting('site_name', config('app.name'));
         $siteTagline = setting('site_tagline', 'Unggul, Berkarakter, Berprestasi');
@@ -32,6 +30,6 @@ class HomeController extends Controller
             'og_image' => setting('site_logo') ? asset('storage/'.setting('site_logo')) : null,
         ];
 
-        return view('welcome', compact('posts', 'stats', 'slides', 'contactItems', 'seo'));
+        return view('welcome', compact('posts', 'stats', 'slides', 'seo'));
     }
 }

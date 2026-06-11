@@ -31,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
             $column->checkFileExistence(false);
         });
 
-        // ── Auto-sync uploads to Media Library ───────────────────────────────────
+        // ── Auto-sync uploads to Galeri & Kegiatan Sekolah ───────────────────────────────────
         Slide::observe(SlideObserver::class);
         Teacher::observe(TeacherObserver::class);
         Post::observe(PostObserver::class);

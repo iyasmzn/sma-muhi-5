@@ -29,7 +29,6 @@ class DatabaseSeeder extends Seeder
         $this->call(StatSeeder::class);
         $this->call(TeacherSeeder::class);
         $this->call(SlideSeeder::class);
-        $this->call(ContactItemSeeder::class);
         $this->call(StaticPageSeeder::class);
         $this->call(PostSeeder::class);
         $this->call(TestimonialSeeder::class);

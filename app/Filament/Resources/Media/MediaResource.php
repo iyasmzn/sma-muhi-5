@@ -22,11 +22,11 @@ class MediaResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Konten';
 
-    protected static ?string $navigationLabel = 'Media Library';
+    protected static ?string $navigationLabel = 'Galeri & Kegiatan Sekolah';
 
     protected static ?string $modelLabel = 'Media';
 
-    protected static ?string $pluralModelLabel = 'Media Library';
+    protected static ?string $pluralModelLabel = 'Galeri & Kegiatan Sekolah';
 
     protected static ?int $navigationSort = 0;
 

@@ -45,7 +45,7 @@ class LandingPageSettings extends Page
             ['key' => 'section_activities',  'label' => '⚽  Kegiatan & Ekskul',         'visible' => true],
             ['key' => 'section_gallery',     'label' => '🖼️  Galeri Foto',              'visible' => true],
             ['key' => 'section_blog',        'label' => '📰  Blog & Berita',             'visible' => true],
-            ['key' => 'section_contact',     'label' => '📞  Kontak Kami',               'visible' => true],
+            ['key' => 'section_contact',     'label' => '📍  Lokasi & Peta',             'visible' => true],
         ];
     }
 

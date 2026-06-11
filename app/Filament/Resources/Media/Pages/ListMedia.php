@@ -39,7 +39,7 @@ class ListMedia extends ListRecords
                         ->maxSize(10240)
                         ->columnSpanFull(),
                 ])
-                ->modalHeading('Upload ke Media Library')
+                ->modalHeading('Upload ke Galeri & Kegiatan Sekolah')
                 ->modalDescription('Pilih satu atau beberapa file. Setiap file akan tersimpan sebagai item media terpisah.')
                 ->modalWidth('xl')
                 ->action(function (array $data): void {

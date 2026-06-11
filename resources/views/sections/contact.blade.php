@@ -1,5 +1,5 @@
-@if($contactItems->isNotEmpty())
-<section id="kontak-section" class="py-24 sm:py-32"
+@if(setting('contact_map_url') && str_starts_with(setting('contact_map_url'), 'https://www.google.com/maps/embed'))
+<section id="lokasi-section" class="py-24 sm:py-32"
          style="background:linear-gradient(135deg,#0a0a0b 0%,#1a1a1e 50%,#0a0f1a 100%)">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -8,58 +8,18 @@
             <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-bold uppercase tracking-widest mb-5"
                  style="background:rgba(217,119,6,.12);border-color:rgba(217,119,6,.3);color:var(--color-amber-300)">
                 <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse inline-block"></span>
-                Hubungi Kami
+                Lokasi Kami
             </div>
             <h2 class="text-3xl sm:text-5xl font-extrabold text-white leading-tight tracking-tight mb-4">
-                Kami Siap Membantu Anda
+                Temukan Kami di Sini
             </h2>
             <p class="text-white/50 text-base max-w-xl mx-auto leading-relaxed">
-                Punya pertanyaan seputar SPMB, akademik, atau kegiatan sekolah? Jangan ragu untuk menghubungi kami.
+                Kunjungi langsung sekolah kami. Informasi kontak lengkap tersedia di bagian bawah halaman.
             </p>
         </div>
 
-        {{-- Contact Cards Grid --}}
-        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-{{ min($contactItems->count(), 3) }} xl:grid-cols-{{ min($contactItems->count(), 4) }}">
-            @foreach($contactItems as $ci)
-                <div class="group relative overflow-hidden rounded-3xl border bg-white/5 backdrop-blur-sm p-7 transition-all duration-300 hover:bg-white/10 hover:border-amber-400/30 hover:shadow-xl hover:shadow-amber-500/10 hover:-translate-y-1"
-                     style="border-color:rgba(255,255,255,.08)"
-                     data-aos="fade-up" data-aos-delay="{{ $loop->index * 80 }}">
-
-                    {{-- Subtle glow on hover --}}
-                    <div class="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                         style="background:radial-gradient(ellipse at top left,rgba(217,119,6,.07),transparent 70%)"></div>
-
-                    {{-- Icon --}}
-                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-5 transition-all duration-300 group-hover:scale-110"
-                         style="background:rgba(217,119,6,.1);border:1px solid rgba(217,119,6,.2)">
-                        {{ $ci->icon }}
-                    </div>
-
-                    {{-- Content --}}
-                    <div class="fi-label mb-1.5" style="color:rgba(217,119,6,.75);letter-spacing:.1em">{{ $ci->label }}</div>
-                    <div class="text-white/80 text-sm font-medium leading-relaxed mb-5">{{ $ci->value }}</div>
-
-                    {{-- Link --}}
-                    @if($ci->link)
-                        <a href="{{ $ci->link }}"
-                           target="{{ str_starts_with($ci->link, 'http') ? '_blank' : '_self' }}"
-                           rel="{{ str_starts_with($ci->link, 'http') ? 'noopener noreferrer' : '' }}"
-                           class="inline-flex items-center gap-1.5 text-sm font-semibold transition-all group/link"
-                           style="color:var(--color-amber-400)">
-                            Buka
-                            <svg class="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5"
-                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                            </svg>
-                        </a>
-                    @endif
-                </div>
-            @endforeach
-        </div>
-
         {{-- Google Maps --}}
-        @if(setting('contact_map_url') && str_starts_with(setting('contact_map_url'), 'https://www.google.com/maps/embed'))
-        <div class="mt-14" data-aos="fade-up" data-aos-delay="150">
+        <div data-aos="fade-up" data-aos-delay="150">
             <div class="relative overflow-hidden rounded-3xl border shadow-2xl shadow-black/40"
                  style="border-color:rgba(255,255,255,.08)">
                 <div class="flex items-center gap-3 px-6 py-4 border-b"
@@ -92,28 +52,6 @@
                     referrerpolicy="no-referrer-when-downgrade"
                     title="Lokasi {{ setting('site_name') }}"
                 ></iframe>
-            </div>
-        </div>
-        @endif
-
-        {{-- Bottom CTA --}}
-        <div class="mt-16 text-center" data-aos="fade-up" data-aos-delay="200">
-            <p class="text-white/40 text-sm mb-6">Atau kunjungi langsung kantor kami pada hari dan jam operasional.</p>
-            <div class="flex flex-wrap gap-4 justify-center">
-                @if(setting('social_whatsapp'))
-                    <a href="https://wa.me/{{ setting('social_whatsapp') }}" target="_blank" rel="noopener"
-                       class="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl font-semibold text-base transition-all hover:opacity-90 shadow-lg shadow-green-500/20 hover:-translate-y-0.5"
-                       style="background:#22c55e;color:#fff">
-                        💬 Chat WhatsApp
-                    </a>
-                @endif
-                @if(setting('contact_email'))
-                    <a href="mailto:{{ setting('contact_email') }}"
-                       class="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl border font-semibold text-base text-white transition-all hover:bg-white/10 hover:-translate-y-0.5"
-                       style="border-color:rgba(255,255,255,.2)">
-                        ✉️ Kirim Email
-                    </a>
-                @endif
             </div>
         </div>
     </div>

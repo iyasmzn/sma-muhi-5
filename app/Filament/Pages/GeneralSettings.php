@@ -132,7 +132,7 @@ class GeneralSettings extends Page
                 ]),
 
             Section::make('Informasi Kontak')
-                ->description('Informasi kontak yang tampil di footer dan halaman kontak.')
+                ->description('Informasi kontak yang tampil di footer, serta peta lokasi di halaman depan.')
                 ->icon('heroicon-o-map-pin')
                 ->schema([
                     Textarea::make('contact_address')
@@ -237,7 +237,7 @@ class GeneralSettings extends Page
 
         Setting::setMany($data);
 
-        // Sync uploaded logo/favicon to the Media Library
+        // Sync uploaded logo/favicon to the Galeri & Kegiatan Sekolah
         $media = app(MediaLibraryService::class);
         foreach (['site_logo', 'site_favicon'] as $key) {
             if (! blank($data[$key] ?? null)) {
