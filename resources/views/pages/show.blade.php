@@ -5,9 +5,14 @@
     /* ── Hero ─────────────────────────────────────────────── */
     .page-hero {
         position: relative;
-        margin-top: -4rem;
-        background: linear-gradient(135deg, #78350f 0%, #92400e 40%, #b45309 70%, #d97706 100%);
-        padding: 9.5rem 0 3.5rem;
+        /* -1px to fully cover the sticky header and remove the hairline white gap */
+        margin-top: calc(-4rem - 1px);
+        background: linear-gradient(135deg,
+            var(--color-amber-900) 0%,
+            var(--color-amber-800) 40%,
+            var(--color-amber-700) 70%,
+            var(--primary) 100%);
+        padding: calc(9.5rem + 1px) 0 3.5rem;
         overflow: hidden;
     }
     .page-hero::before {
@@ -35,7 +40,7 @@
         margin-top: 2.5rem;
         margin-bottom: 1rem;
         padding-bottom: .625rem;
-        border-bottom: 2px solid #fde68a;
+        border-bottom: 2px solid var(--color-amber-200);
         display: inline-block;
     }
     .page-prose h3 {
@@ -54,22 +59,22 @@
     .page-prose ol  { list-style: decimal; }
     .page-prose li  { margin-bottom: .5rem; line-height: 1.75; }
     .page-prose blockquote {
-        border-left: 4px solid #d97706;
+        border-left: 4px solid var(--primary);
         padding: .875rem 1.25rem;
         margin: 2rem 0;
-        background: #fffbeb;
+        background: var(--color-amber-50);
         border-radius: 0 .75rem .75rem 0;
-        color: #78350f;
+        color: var(--color-amber-900);
         font-style: italic;
         font-size: .95rem;
     }
-    .page-prose a     { color: #d97706; text-decoration: underline; text-underline-offset: 3px; font-weight: 500; }
-    .page-prose a:hover { color: #b45309; }
+    .page-prose a     { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; font-weight: 500; }
+    .page-prose a:hover { color: var(--color-amber-700); }
     .page-prose strong { color: #111827; font-weight: 700; }
     .page-prose img    { border-radius: .75rem; margin: 1.75rem 0; max-width: 100%; }
-    .page-prose code   { background: #f3f4f6; padding: .125rem .4rem; border-radius: .25rem; font-size: .875em; color: #d97706; }
+    .page-prose code   { background: #f3f4f6; padding: .125rem .4rem; border-radius: .25rem; font-size: .875em; color: var(--primary); }
     .page-prose table  { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: .875rem; }
-    .page-prose th     { background: #fffbeb; color: #92400e; font-weight: 700; padding: .625rem 1rem; text-align: left; border-bottom: 2px solid #fde68a; }
+    .page-prose th     { background: var(--color-amber-50); color: var(--color-amber-800); font-weight: 700; padding: .625rem 1rem; text-align: left; border-bottom: 2px solid var(--color-amber-200); }
     .page-prose td     { padding: .625rem 1rem; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
     .page-prose tr:last-child td { border-bottom: none; }
 
@@ -87,8 +92,8 @@
         transition: background .15s, color .15s;
         cursor: pointer;
     }
-    .toc-item:hover { background: #fffbeb; color: #b45309; }
-    .toc-num { flex-shrink: 0; font-weight: 700; color: #fbbf24; font-size: .6875rem; min-width: 1.25rem; }
+    .toc-item:hover { background: var(--color-amber-50); color: var(--color-amber-700); }
+    .toc-num { flex-shrink: 0; font-weight: 700; color: var(--color-amber-400); font-size: .6875rem; min-width: 1.25rem; }
 
     /* ── Other pages list ─────────────────────────────────── */
     .page-link {
@@ -102,18 +107,18 @@
         transition: background .15s, color .15s;
         line-height: 1.4;
     }
-    .page-link:hover { background: #fffbeb; color: #b45309; }
+    .page-link:hover { background: var(--color-amber-50); color: var(--color-amber-700); }
     .page-link svg   { flex-shrink: 0; }
 
     /* ── Blocks ───────────────────────────────────────────── */
     .block-label {
         display: inline-flex; align-items: center; gap: .4rem;
         font-size: .6875rem; font-weight: 700; letter-spacing: .07em;
-        text-transform: uppercase; color: #d97706; margin-bottom: .75rem;
+        text-transform: uppercase; color: var(--primary); margin-bottom: .75rem;
     }
     .block-label::before {
         content: ''; display: inline-block; width: 1rem; height: 2px;
-        background: #d97706; border-radius: 1px;
+        background: var(--primary); border-radius: 1px;
     }
 
     /* Cover Image */
@@ -192,7 +197,7 @@
     <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {{-- Breadcrumb --}}
-        <nav class="flex items-center gap-1.5 text-xs text-amber-200/70 mb-6" aria-label="Breadcrumb">
+        <nav class="flex items-center gap-1.5 text-xs mb-6" style="color:color-mix(in oklab, var(--color-amber-200) 70%, transparent)" aria-label="Breadcrumb">
             <a href="{{ route('home') }}" class="hover:text-white transition-colors inline-flex items-center gap-1">
                 <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
@@ -202,12 +207,12 @@
             <svg class="w-3 h-3 opacity-40 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
             </svg>
-            <span class="text-amber-100 font-medium truncate">{{ $page->title }}</span>
+            <span class="font-medium truncate" style="color:var(--color-amber-100)">{{ $page->title }}</span>
         </nav>
 
         {{-- Label --}}
-        <div class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-amber-300 mb-3">
-            <span class="w-4 h-px bg-amber-400 inline-block"></span>
+        <div class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest mb-3" style="color:var(--color-amber-300)">
+            <span class="w-4 h-px inline-block" style="background:var(--color-amber-400)"></span>
             Halaman Informasi
         </div>
 
@@ -218,13 +223,13 @@
 
         {{-- Meta description --}}
         @if($page->meta_description)
-            <p class="text-amber-100/80 text-sm sm:text-base leading-relaxed max-w-2xl mb-6">
+            <p class="text-sm sm:text-base leading-relaxed max-w-2xl mb-6" style="color:color-mix(in oklab, var(--color-amber-100) 80%, transparent)">
                 {{ $page->meta_description }}
             </p>
         @endif
 
         {{-- Date badge --}}
-        <div class="inline-flex items-center gap-2 text-xs text-amber-200/60 bg-white/5 border border-white/10 rounded-full px-3 py-1.5">
+        <div class="inline-flex items-center gap-2 text-xs bg-white/5 border border-white/10 rounded-full px-3 py-1.5" style="color:color-mix(in oklab, var(--color-amber-200) 75%, transparent)">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
@@ -233,8 +238,8 @@
     </div>
 </div>
 
-{{-- Amber accent bar --}}
-<div style="height:4px;background:linear-gradient(90deg,#d97706,#fbbf24 50%,#fde68a 100%)"></div>
+{{-- Accent bar (theme-coloured) --}}
+<div style="height:4px;background:linear-gradient(90deg,var(--primary),var(--color-amber-400) 50%,var(--color-amber-200) 100%)"></div>
 
 {{-- ═══════════════════════════════════════════════════
      CONTENT BODY
@@ -245,8 +250,8 @@
         {{-- ── Main content ────────────────────────────────── --}}
         <article class="lg:col-span-3" data-aos="fade-up" data-aos-duration="500">
             <div class="fi-card overflow-hidden">
-                {{-- Card amber top accent --}}
-                <div style="height:3px;background:linear-gradient(90deg,#d97706,#fbbf24 60%,transparent)"></div>
+                {{-- Card top accent (theme-coloured) --}}
+                <div style="height:3px;background:linear-gradient(90deg,var(--primary),var(--color-amber-400) 60%,transparent)"></div>
                 <div class="p-6 sm:p-10">
                     @if($page->content)
                         <div class="page-prose">
