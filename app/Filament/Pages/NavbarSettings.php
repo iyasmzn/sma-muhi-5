@@ -182,7 +182,6 @@ class NavbarSettings extends Page
             ['label' => 'Beranda',  'url' => '/',          'target' => '_self', 'is_active' => true, 'children' => []],
             ['label' => 'Profil',   'url' => '#profil',    'target' => '_self', 'is_active' => true, 'children' => []],
             ['label' => 'SPMB',     'url' => '#spmb',      'target' => '_self', 'is_active' => true, 'children' => []],
-            ['label' => 'Akademik', 'url' => '#akademik',  'target' => '_self', 'is_active' => true, 'children' => []],
             ['label' => 'Program',  'url' => '/program',   'target' => '_self', 'is_active' => true, 'children' => []],
             ['label' => 'Guru',     'url' => '/guru',      'target' => '_self', 'is_active' => true, 'children' => []],
             ['label' => 'Blog',     'url' => '/blog',      'target' => '_self', 'is_active' => true, 'children' => []],

@@ -21,6 +21,8 @@ class ShieldSeeder extends Seeder
             '--all' => true,
             '--panel' => 'admin',
             '--ignore-existing-policies' => true,
+            '--no-interaction' => true,
+            '--silent' => true,
         ]);
 
         // 3. Flush cache lagi agar Permission::all() baca dari DB bukan cache lama
