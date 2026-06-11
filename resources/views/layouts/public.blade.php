@@ -82,6 +82,8 @@
     <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
 
     <style>
+        [x-cloak] { display: none !important; }
+
         /* ── Design tokens — Apple-inspired ─────────────────────── */
         :root {
             --bg:     #f5f5f7;

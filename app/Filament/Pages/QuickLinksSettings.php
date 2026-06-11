@@ -90,7 +90,6 @@ class QuickLinksSettings extends Page
                         ->addActionLabel('+ Tambah Tautan')
                         ->reorderable()
                         ->reorderableWithDragAndDrop()
-                        ->maxItems(8)
                         ->defaultItems(0)
                         ->itemLabel(fn (array $state): string => trim(($state['icon'] ?? '').' '.($state['label'] ?? 'Item baru')))
                         ->collapsible()
