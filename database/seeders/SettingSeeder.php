@@ -31,6 +31,7 @@ class SettingSeeder extends Seeder
             $this->quickLinks(),
             $this->spmb(),
             $this->theme(),
+            $this->errorPages(),
         );
     }
 
@@ -188,6 +189,38 @@ class SettingSeeder extends Seeder
         return [
             'theme_primary_color' => '#d97706',
             'theme_font' => 'instrument-sans',
+        ];
+    }
+
+    // ── Halaman Error ─────────────────────────────────────────────────
+
+    /** @return array<string, mixed> */
+    private function errorPages(): array
+    {
+        return [
+            'error_403_label' => 'Akses Ditolak',
+            'error_403_title' => 'Kamu tidak punya akses',
+            'error_403_message' => 'Halaman ini bersifat terbatas. Jika kamu merasa ini sebuah kesalahan, silakan hubungi administrator.',
+
+            'error_404_label' => 'Halaman Tidak Ditemukan',
+            'error_404_title' => 'Sepertinya kamu tersesat',
+            'error_404_message' => 'Halaman yang kamu cari mungkin sudah dipindahkan, dihapus, atau alamatnya salah ketik.',
+
+            'error_419_label' => 'Sesi Berakhir',
+            'error_419_title' => 'Sesi kamu telah berakhir',
+            'error_419_message' => 'Demi keamanan, sesi kamu telah kedaluwarsa. Silakan muat ulang halaman lalu coba lagi.',
+
+            'error_429_label' => 'Terlalu Banyak Permintaan',
+            'error_429_title' => 'Pelan-pelan dulu',
+            'error_429_message' => 'Kamu mengirim terlalu banyak permintaan dalam waktu singkat. Mohon tunggu beberapa saat lalu coba lagi.',
+
+            'error_500_label' => 'Kesalahan Server',
+            'error_500_title' => 'Ada yang tidak beres',
+            'error_500_message' => 'Terjadi kesalahan di server kami. Tim kami sudah diberi tahu dan sedang menanganinya.',
+
+            'error_503_label' => 'Sedang Pemeliharaan',
+            'error_503_title' => 'Website sedang dalam pemeliharaan',
+            'error_503_message' => 'Kami sedang melakukan perbaikan agar layanan menjadi lebih baik. Silakan kembali beberapa saat lagi.',
         ];
     }
 }
