@@ -93,23 +93,26 @@ class SpmbSettings extends Page
                         ->maxLength(300)
                         ->columnSpanFull(),
 
-                    Grid::make(3)->schema([
-                        TextInput::make('spmb_card_cta_label')
-                            ->label('Label Tombol Utama')
-                            ->maxLength(40)
-                            ->placeholder('Daftar Sekarang'),
+                    // Tombol kartu SPMB disembunyikan sementara — gunakan nilai default.
+                    Grid::make(3)
+                        ->hidden()
+                        ->schema([
+                            TextInput::make('spmb_card_cta_label')
+                                ->label('Label Tombol Utama')
+                                ->maxLength(40)
+                                ->placeholder('Daftar Sekarang'),
 
-                        TextInput::make('spmb_card_cta_url')
-                            ->label('URL Tombol Utama')
-                            ->maxLength(200)
-                            ->placeholder('/ppdb'),
+                            TextInput::make('spmb_card_cta_url')
+                                ->label('URL Tombol Utama')
+                                ->maxLength(200)
+                                ->placeholder('/ppdb'),
 
-                        TextInput::make('spmb_card_secondary_label')
-                            ->label('Label Tombol Kedua')
-                            ->maxLength(40)
-                            ->placeholder('Info Selengkapnya')
-                            ->hint('URL tombol kedua selalu menuju /ppdb'),
-                    ]),
+                            TextInput::make('spmb_card_secondary_label')
+                                ->label('Label Tombol Kedua')
+                                ->maxLength(40)
+                                ->placeholder('Info Selengkapnya')
+                                ->hint('URL tombol kedua selalu menuju /ppdb'),
+                        ]),
                 ]),
 
             Section::make('Tahapan SPMB — Halaman Depan')
