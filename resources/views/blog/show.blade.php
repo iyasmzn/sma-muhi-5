@@ -56,9 +56,11 @@
     /* Hero */
     .article-hero {
         position: relative;
-        margin-top: -4rem;
+        /* Pull the hero up under the transparent sticky header so they merge.
+           No top padding, so the image fills behind the header instead of
+           leaving a white strip (-1px hides the header's hairline border). */
+        margin-top: calc(-4rem - 1px);
         height: 24rem;
-        padding-top: 4rem;
         overflow: hidden;
     }
     @media(min-width: 640px) { .article-hero { height: 30rem; } }
@@ -297,7 +299,7 @@
 
         {{-- Overlay content --}}
         <div class="absolute bottom-0 inset-x-0 p-6 sm:p-10">
-            <div class="max-w-4xl mx-auto">
+            <div class="max-w-7xl mx-auto">
                 {{-- Mobile breadcrumb --}}
                 <nav aria-label="Breadcrumb" class="md:hidden flex items-center gap-1.5 text-xs text-white/60 mb-3">
                     <a href="/" class="hover:text-white transition-colors">Beranda</a>
@@ -315,11 +317,15 @@
     </div>
 
     {{-- ── Article Body ─────────────────────────────────────── --}}
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10" data-aos="fade-up" data-aos-duration="500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" data-aos="fade-up" data-aos-duration="500">
         <div class="grid lg:grid-cols-4 gap-10">
 
             {{-- ── Main Content ──────────────────────────────── --}}
             <div class="lg:col-span-3">
+              <div class="fi-card overflow-hidden">
+                {{-- Card top accent (theme-coloured) --}}
+                <div style="height:3px;background:linear-gradient(90deg,var(--primary),var(--color-amber-400) 60%,transparent)"></div>
+                <div class="p-6 sm:p-10">
 
                 {{-- Meta bar --}}
                 <div class="flex flex-wrap items-center gap-x-5 gap-y-3 pb-6 mb-8 border-b border-gray-100">
@@ -537,6 +543,8 @@
                         </button>
                     </div>
                 </div>
+                </div>
+              </div>
             </div>
 
             {{-- ── Sidebar ────────────────────────────────────── --}}

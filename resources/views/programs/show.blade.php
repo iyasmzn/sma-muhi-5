@@ -19,9 +19,11 @@
 <style>
     .program-detail-hero {
         position: relative;
-        margin-top: -4rem;
+        /* Pull the hero up under the transparent sticky header so they merge.
+           No top padding, so the image fills behind the header instead of
+           leaving a white strip (-1px hides the header's hairline border). */
+        margin-top: calc(-4rem - 1px);
         height: 22rem;
-        padding-top: 4rem;
         overflow: hidden;
     }
     @media(min-width: 640px) { .program-detail-hero { height: 28rem; } }
@@ -70,7 +72,7 @@
             <img src="{{ $program->thumbnail_url }}" alt="{{ $program->title }}" loading="eager">
             <div class="program-detail-hero-overlay"></div>
             <div class="absolute bottom-0 inset-x-0 p-6 sm:p-10">
-                <div class="max-w-4xl mx-auto">
+                <div class="max-w-7xl mx-auto">
                     <nav aria-label="Breadcrumb" class="md:hidden flex items-center gap-1.5 text-xs text-white/60 mb-3">
                         <a href="/" class="hover:text-white transition-colors">Beranda</a>
                         <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
@@ -90,7 +92,7 @@
     @else
         <section class="program-hero -mt-17 pt-30 pb-14 sm:pt-36 sm:pb-20"
                  style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0c1a14 100%)">
-            <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <nav aria-label="Breadcrumb" class="flex items-center gap-1.5 text-xs mb-5 text-white/50">
                     <a href="/" class="hover:text-white transition-colors">Beranda</a>
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
@@ -109,10 +111,14 @@
     @endif
 
     {{-- ── Body ─────────────────────────────────────────────── --}}
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10" data-aos="fade-up" data-aos-duration="500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" data-aos="fade-up" data-aos-duration="500">
         <div class="grid lg:grid-cols-4 gap-10">
 
             <div class="lg:col-span-3">
+              <div class="fi-card overflow-hidden">
+                {{-- Card top accent (theme-coloured) --}}
+                <div style="height:3px;background:linear-gradient(90deg,var(--primary),var(--color-amber-400) 60%,transparent)"></div>
+                <div class="p-6 sm:p-10">
                 @if($program->excerpt)
                     <p class="text-base font-medium leading-relaxed mb-8 p-5 rounded-xl border-l-4 border-amber-400 bg-amber-50 text-amber-900">
                         {{ $program->excerpt }}
@@ -181,6 +187,8 @@
                         </button>
                     </div>
                 </div>
+                </div>
+              </div>
             </div>
 
             {{-- ── Sidebar ────────────────────────────────────── --}}
