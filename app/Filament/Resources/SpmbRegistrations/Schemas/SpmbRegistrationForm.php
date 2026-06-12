@@ -65,8 +65,8 @@ class SpmbRegistrationForm
 
                         TextInput::make('nik')
                             ->label('NIK')
-                            ->numeric()
-                            ->length(16)
+                            ->mask('9999999999999999')
+                            ->rule('digits:16')
                             ->unique(ignoreRecord: true)
                             ->helperText('Nomor Induk Kependudukan, 16 digit.'),
 
