@@ -37,15 +37,20 @@ class MediaTable
                         ->extraImgAttributes([
                             'style' => 'width:100%;height:100%;object-fit:cover;display:block;',
                         ])
-                        ->defaultImageUrl(fn (Media $record): string => $record->is_image
-                            ? ''
-                            : 'data:image/svg+xml,'.rawurlencode(
-                                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="#d97706">'
-                                .'<rect width="80" height="80" rx="8" fill="#fffbeb"/>'
-                                .'<text x="40" y="50" font-size="32" text-anchor="middle">📄</text>'
-                                .'</svg>'
-                            )
-                        ),
+                        ->defaultImageUrl(function (Media $record): string {
+                            if ($record->is_embed) {
+                                return $record->embed_thumbnail ?? '';
+                            }
+
+                            return $record->is_image
+                                ? ''
+                                : 'data:image/svg+xml,'.rawurlencode(
+                                    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="#d97706">'
+                                    .'<rect width="80" height="80" rx="8" fill="#fffbeb"/>'
+                                    .'<text x="40" y="50" font-size="32" text-anchor="middle">📄</text>'
+                                    .'</svg>'
+                                );
+                        }),
 
                     // Meta below thumbnail
                     Stack::make([
@@ -58,11 +63,14 @@ class MediaTable
 
                         TextColumn::make('size_formatted')
                             ->label('Ukuran')
+                            ->state(fn (Media $record): ?string => $record->is_embed ? null : $record->size_formatted)
                             ->color('gray')
                             ->size(TextSize::ExtraSmall),
 
-                        TextColumn::make('mime_type')
+                        TextColumn::make('type_label')
                             ->label('Tipe')
+                            ->state(fn (Media $record): string => $record->getTypeLabel())
+                            ->badge(fn (Media $record): bool => $record->is_embed)
                             ->color('gray')
                             ->size(TextSize::ExtraSmall)
                             ->limit(30),
@@ -87,6 +95,7 @@ class MediaTable
                     ->options([
                         'image' => '🖼️  Gambar',
                         'pdf' => '📄  PDF',
+                        'embed' => '🎬  Video Embed',
                         'other' => '📎  Lainnya',
                     ])
                     ->query(function ($query, array $data): void {
@@ -96,7 +105,9 @@ class MediaTable
                         match ($data['value']) {
                             'image' => $query->where('mime_type', 'like', 'image/%'),
                             'pdf' => $query->where('mime_type', 'application/pdf'),
-                            'other' => $query->where('mime_type', 'not like', 'image/%')
+                            'embed' => $query->whereNotNull('embed_provider'),
+                            'other' => $query->whereNull('embed_provider')
+                                ->where('mime_type', 'not like', 'image/%')
                                 ->where('mime_type', '!=', 'application/pdf'),
                         };
                     }),
@@ -119,7 +130,9 @@ class MediaTable
 
                 DeleteAction::make()
                     ->after(function (Media $record): void {
-                        Storage::disk($record->disk)->delete($record->path);
+                        if (filled($record->path)) {
+                            Storage::disk($record->disk)->delete($record->path);
+                        }
                     }),
             ])
             ->bulkActions([
@@ -130,7 +143,9 @@ class MediaTable
                     ->requiresConfirmation()
                     ->action(function (Collection $records): void {
                         foreach ($records as $record) {
-                            Storage::disk($record->disk)->delete($record->path);
+                            if (filled($record->path)) {
+                                Storage::disk($record->disk)->delete($record->path);
+                            }
                             $record->delete();
                         }
 

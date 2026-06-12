@@ -4,8 +4,12 @@ namespace App\Filament\Resources\Media\Pages;
 
 use App\Filament\Resources\Media\MediaResource;
 use App\Models\Media;
+use App\Services\EmbedVideo;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Icons\Heroicon;
@@ -70,6 +74,65 @@ class ListMedia extends ListRecords
                     Notification::make()
                         ->success()
                         ->title($count === 1 ? '1 file berhasil diupload' : "{$count} file berhasil diupload")
+                        ->send();
+                }),
+
+            Action::make('add_embed')
+                ->label('Tambah Embed Video')
+                ->icon(Heroicon::OutlinedVideoCamera)
+                ->color('gray')
+                ->schema([
+                    TextInput::make('name')
+                        ->label('Judul')
+                        ->required()
+                        ->maxLength(200)
+                        ->placeholder('Video Wisuda Angkatan 2025'),
+
+                    TextInput::make('embed_url')
+                        ->label('URL Video')
+                        ->required()
+                        ->url()
+                        ->maxLength(1000)
+                        ->placeholder('https://www.youtube.com/watch?v=...')
+                        ->helperText('Tempel link video dari YouTube, TikTok, atau Instagram.')
+                        ->rule(static fn (): Closure => static function (string $attribute, mixed $value, Closure $fail): void {
+                            $provider = EmbedVideo::detectProvider((string) $value);
+
+                            if ($provider === null) {
+                                $fail('URL harus dari YouTube, TikTok, atau Instagram.');
+
+                                return;
+                            }
+
+                            if (! EmbedVideo::isValid((string) $value)) {
+                                $fail('Tidak dapat membaca ID video dari URL. Pastikan ini link video (bukan link profil/halaman).');
+                            }
+                        }),
+
+                    Textarea::make('description')
+                        ->label('Deskripsi')
+                        ->rows(2)
+                        ->maxLength(1000)
+                        ->placeholder('Keterangan singkat tentang video ini...'),
+                ])
+                ->modalHeading('Tambah Embed Video')
+                ->modalDescription('Tanpa upload file — cukup tempel link videonya.')
+                ->modalWidth('xl')
+                ->action(function (array $data): void {
+                    $url = trim($data['embed_url']);
+
+                    Media::create([
+                        'name' => $data['name'],
+                        'description' => $data['description'] ?? null,
+                        'embed_provider' => EmbedVideo::detectProvider($url),
+                        'embed_url' => $url,
+                        'disk' => 'public',
+                        'uploaded_by' => Auth::id(),
+                    ]);
+
+                    Notification::make()
+                        ->success()
+                        ->title('Embed video ditambahkan')
                         ->send();
                 }),
         ];

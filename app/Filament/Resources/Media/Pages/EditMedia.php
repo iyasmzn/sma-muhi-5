@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Media\Pages;
 
 use App\Filament\Resources\Media\MediaResource;
+use App\Services\EmbedVideo;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Storage;
@@ -16,13 +17,23 @@ class EditMedia extends EditRecord
         return [
             DeleteAction::make()
                 ->after(function (): void {
-                    Storage::disk($this->record->disk)->delete($this->record->path);
+                    if (filled($this->record->path)) {
+                        Storage::disk($this->record->disk)->delete($this->record->path);
+                    }
                 }),
         ];
     }
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        // Embed items: keep the provider in sync with the (possibly changed) URL.
+        if (filled($data['embed_url'] ?? null)) {
+            $data['embed_url'] = trim($data['embed_url']);
+            $data['embed_provider'] = EmbedVideo::detectProvider($data['embed_url']);
+
+            return $data;
+        }
+
         // If a new file was uploaded, update size and mime_type
         if (isset($data['path']) && $data['path'] !== $this->record->path) {
             $disk = Storage::disk($data['disk'] ?? 'public');
