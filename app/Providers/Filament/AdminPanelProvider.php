@@ -57,9 +57,38 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
-                fn (): HtmlString => new HtmlString(
-                    '<style>.fi-ta-content-grid .fi-ta-record{overflow:hidden}</style>',
-                ),
+                fn (): HtmlString => new HtmlString(<<<'HTML'
+                    <style>
+                        .fi-ta-content-grid .fi-ta-record{overflow:hidden}
+
+                        /* Roomier writing surface for the content rich editors. */
+                        .fi-fo-rich-editor .fi-fo-rich-editor-content{min-height:24rem}
+
+                        /* Fullscreen mode toggled by the editor's fullscreen tool. */
+                        .fi-fo-rich-editor.fi-fo-rich-editor-fullscreen{position:fixed;inset:0;z-index:50;margin:0;border-radius:0;padding:1rem;background-color:#f9fafb}
+                        .dark .fi-fo-rich-editor.fi-fo-rich-editor-fullscreen{background-color:#09090b}
+                        .fi-fo-rich-editor.fi-fo-rich-editor-fullscreen>div{display:flex;flex-direction:column;height:100%}
+                        .fi-fo-rich-editor.fi-fo-rich-editor-fullscreen .fi-fo-rich-editor-main{flex:1 1 auto;overflow-y:auto}
+                        .fi-fo-rich-editor.fi-fo-rich-editor-fullscreen .fi-fo-rich-editor-content{min-height:100%}
+                        body.fi-rich-editor-fullscreen-active{overflow:hidden}
+                    </style>
+                    <script>
+                        document.addEventListener('keydown', (event) => {
+                            if (event.key !== 'Escape') {
+                                return
+                            }
+
+                            const fullscreenEditor = document.querySelector('.fi-fo-rich-editor-fullscreen')
+
+                            if (! fullscreenEditor) {
+                                return
+                            }
+
+                            fullscreenEditor.classList.remove('fi-fo-rich-editor-fullscreen')
+                            document.body.classList.remove('fi-rich-editor-fullscreen-active')
+                        })
+                    </script>
+                    HTML),
             )
             ->authMiddleware([
                 Authenticate::class,

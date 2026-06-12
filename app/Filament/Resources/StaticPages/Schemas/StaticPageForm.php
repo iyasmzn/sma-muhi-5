@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\StaticPages\Schemas;
 
+use App\Filament\RichEditor\ContentRichEditor;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -54,7 +54,7 @@ class StaticPageForm
 
                 Section::make('Konten')
                     ->schema([
-                        RichEditor::make('content')
+                        ContentRichEditor::make('content')
                             ->label('Isi Halaman')
                             ->fileAttachmentsDisk('public')
                             ->fileAttachmentsDirectory('pages/attachments')

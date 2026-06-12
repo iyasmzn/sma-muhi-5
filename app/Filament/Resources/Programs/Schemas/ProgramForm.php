@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Programs\Schemas;
 
+use App\Filament\RichEditor\ContentRichEditor;
 use App\Models\Program;
 use Closure;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
@@ -46,7 +46,7 @@ class ProgramForm
                             ->hint('Maksimal 300 karakter. Tampil di kartu program & SEO.')
                             ->columnSpanFull(),
 
-                        RichEditor::make('description')
+                        ContentRichEditor::make('description')
                             ->label('Deskripsi Program')
                             ->required()
                             ->fileAttachmentsDisk('public')

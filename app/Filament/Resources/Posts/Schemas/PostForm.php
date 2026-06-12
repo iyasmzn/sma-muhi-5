@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Posts\Schemas;
 
+use App\Filament\RichEditor\ContentRichEditor;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -58,7 +58,7 @@ class PostForm
                             ->hint('Maksimal 300 karakter. Digunakan untuk SEO dan preview.')
                             ->columnSpanFull(),
 
-                        RichEditor::make('content')
+                        ContentRichEditor::make('content')
                             ->label('Konten Artikel')
                             ->required()
                             ->fileAttachmentsDisk('public')
