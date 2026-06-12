@@ -243,6 +243,7 @@
         ['key' => 'section_programs',    'visible' => true],
         ['key' => 'section_gallery',     'visible' => true],
         ['key' => 'section_blog',        'visible' => true],
+        ['key' => 'section_testimonials', 'visible' => true],
         ['key' => 'section_contact',     'visible' => true],
     ];
 
@@ -261,12 +262,22 @@
         $reconciled[] = $entry;
         $seenKeys[] = $key;
     }
-    // Append any newly introduced sections missing from the saved order.
-    foreach ($defaultSectionOrder as $defaultSection) {
-        if (! in_array($defaultSection['key'], $seenKeys, true)) {
-            $reconciled[] = $defaultSection;
-            $seenKeys[] = $defaultSection['key'];
+    // Insert any newly introduced sections at their default-relative position,
+    // i.e. before the next default section that already exists in the saved order.
+    foreach ($defaultSectionOrder as $i => $defaultSection) {
+        if (in_array($defaultSection['key'], $seenKeys, true)) {
+            continue;
         }
+        $insertAt = count($reconciled);
+        for ($j = $i + 1; $j < count($defaultSectionOrder); $j++) {
+            $pos = array_search($defaultSectionOrder[$j]['key'], array_column($reconciled, 'key'), true);
+            if ($pos !== false) {
+                $insertAt = $pos;
+                break;
+            }
+        }
+        array_splice($reconciled, $insertAt, 0, [$defaultSection]);
+        $seenKeys[] = $defaultSection['key'];
     }
     $sectionOrder = $reconciled;
 
@@ -280,6 +291,7 @@
         'section_programs'    => 'sections.programs',
         'section_gallery'     => 'sections.gallery',
         'section_blog'        => 'sections.blog',
+        'section_testimonials' => 'sections.testimonials',
         'section_contact'     => 'sections.contact',
     ];
 @endphp

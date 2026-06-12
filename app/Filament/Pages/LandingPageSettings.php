@@ -45,6 +45,7 @@ class LandingPageSettings extends Page
             ['key' => 'section_programs',    'label' => '🎓  Program Sekolah',          'visible' => true],
             ['key' => 'section_gallery',     'label' => '🖼️  Galeri Foto',              'visible' => true],
             ['key' => 'section_blog',        'label' => '📰  Blog & Berita',             'visible' => true],
+            ['key' => 'section_testimonials', 'label' => '💬  Kesan & Pesan Alumni',     'visible' => true],
             ['key' => 'section_contact',     'label' => '📍  Lokasi & Peta',             'visible' => true],
         ];
     }
@@ -86,12 +87,23 @@ class LandingPageSettings extends Page
             $seenKeys[] = $key;
         }
 
-        // Append any newly introduced sections not yet present.
-        foreach (self::defaultSections() as $default) {
-            if (! in_array($default['key'], $seenKeys, true)) {
-                $normalized[] = $default;
-                $seenKeys[] = $default['key'];
+        // Insert any newly introduced sections at their default-relative position,
+        // i.e. before the next default section that already exists in the saved order.
+        $defaults = self::defaultSections();
+        foreach ($defaults as $i => $default) {
+            if (in_array($default['key'], $seenKeys, true)) {
+                continue;
             }
+            $insertAt = count($normalized);
+            for ($j = $i + 1; $j < count($defaults); $j++) {
+                $pos = array_search($defaults[$j]['key'], array_column($normalized, 'key'), true);
+                if ($pos !== false) {
+                    $insertAt = $pos;
+                    break;
+                }
+            }
+            array_splice($normalized, $insertAt, 0, [$default]);
+            $seenKeys[] = $default['key'];
         }
 
         return $normalized;

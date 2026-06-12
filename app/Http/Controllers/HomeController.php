@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Models\Program;
 use App\Models\Slide;
 use App\Models\Stat;
+use App\Models\Testimonial;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -28,6 +29,9 @@ class HomeController extends Controller
             ->limit(Program::MAX_FEATURED)
             ->get();
 
+        // Alumni testimonials ("kesan & pesan") for the landing section
+        $testimonials = Testimonial::published()->get();
+
         $siteName = setting('site_name', config('app.name'));
         $siteTagline = setting('site_tagline', 'Unggul, Berkarakter, Berprestasi');
 
@@ -38,6 +42,6 @@ class HomeController extends Controller
             'og_image' => setting('site_logo') ? asset('storage/'.setting('site_logo')) : null,
         ];
 
-        return view('welcome', compact('posts', 'stats', 'slides', 'programs', 'seo'));
+        return view('welcome', compact('posts', 'stats', 'slides', 'programs', 'testimonials', 'seo'));
     }
 }

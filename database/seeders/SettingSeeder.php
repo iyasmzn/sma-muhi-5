@@ -91,6 +91,7 @@ class SettingSeeder extends Seeder
                 ['key' => 'section_activities',  'visible' => true],
                 ['key' => 'section_gallery',     'visible' => true],
                 ['key' => 'section_blog',        'visible' => true],
+                ['key' => 'section_testimonials', 'visible' => true],
                 ['key' => 'section_contact',     'visible' => true],
             ]),
         ];
