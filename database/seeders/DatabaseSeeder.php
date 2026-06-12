@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
         $this->call(SpmbRegistrationSeeder::class);
         $this->call(StatSeeder::class);
         $this->call(TeacherSeeder::class);
+        $this->call(AlumniSeeder::class);
         $this->call(SlideSeeder::class);
         $this->call(StaticPageSeeder::class);
         $this->call(PostSeeder::class);
