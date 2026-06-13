@@ -43,9 +43,11 @@ class MediaLibraryService
      * Create (or update) a Media record for an uploaded file with an explicit
      * name and alt text. When the file already has a Media record, only the
      * provided metadata is refreshed; otherwise a record is created with a
-     * unique name. Returns the resulting Media, or null on failure.
+     * unique name. Pass $createOnly to leave an existing record's metadata
+     * untouched (used when the name is auto-derived, not user-entered).
+     * Returns the resulting Media, or null on failure.
      */
-    public function store(string $path, ?string $name = null, ?string $alt = null, string $disk = 'public'): ?Media
+    public function store(string $path, ?string $name = null, ?string $alt = null, string $disk = 'public', bool $createOnly = false): ?Media
     {
         if (blank($path)) {
             return null;
@@ -61,6 +63,10 @@ class MediaLibraryService
             $existing = Media::query()->where('path', $path)->where('disk', $disk)->first();
 
             if ($existing) {
+                if ($createOnly) {
+                    return $existing;
+                }
+
                 $existing->fill(array_filter([
                     'name' => filled($name) ? $name : null,
                     'alt' => filled($alt) ? $alt : null,

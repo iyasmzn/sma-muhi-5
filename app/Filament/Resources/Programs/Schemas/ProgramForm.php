@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Programs\Schemas;
 
+use App\Filament\Concerns\InteractsWithImagePicker;
 use App\Filament\RichEditor\ContentRichEditor;
 use App\Models\Program;
 use Closure;
@@ -16,6 +17,8 @@ use Illuminate\Support\Str;
 
 class ProgramForm
 {
+    use InteractsWithImagePicker;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -58,18 +61,16 @@ class ProgramForm
 
                 Section::make('Media & Kategori')
                     ->schema([
-                        FileUpload::make('image')
-                            ->label('Gambar Utama')
-                            ->image()
-                            ->disk('public')
-                            ->directory('programs/images')
-                            ->visibility('public')
-                            ->automaticallyCropImagesToAspectRatio('16:9')
-                            ->automaticallyResizeImagesMode('cover')
-                            ->automaticallyResizeImagesToWidth('1200')
-                            ->automaticallyResizeImagesToHeight('675')
-                            ->hint('Rasio 16:9 disarankan. Akan di-resize ke 1200×675.')
-                            ->columnSpanFull(),
+                        self::imagePicker(
+                            key: 'image',
+                            label: 'Gambar Utama',
+                            hint: 'Rasio 16:9 disarankan. Akan di-resize ke 1200×675.',
+                            accepted: ['image/jpeg', 'image/png', 'image/webp'],
+                            width: 1200,
+                            height: 675,
+                            directory: 'programs/images',
+                            aspectRatio: '16:9',
+                        ),
 
                         Grid::make(2)
                             ->schema([
@@ -92,7 +93,7 @@ class ProgramForm
                                     ->hint('Tampil bila tidak ada gambar.'),
                             ]),
                     ])
-                    ->columns(2),
+                    ->columns(1),
 
                 Section::make('Galeri Program')
                     ->description('Unggah beberapa foto kegiatan program. Ditampilkan di halaman detail program.')
@@ -110,6 +111,8 @@ class ProgramForm
                             ->imageEditor()
                             ->hint('Bisa pilih banyak gambar sekaligus. Tarik untuk mengatur urutan.')
                             ->columnSpanFull(),
+
+                        self::mediaLibrarySelect('gallery_library', 'Atau Pilih dari Media'),
                     ]),
 
                 Section::make('Publikasi')
