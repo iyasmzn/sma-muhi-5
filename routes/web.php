@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DownloadController;
+use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProgramController;
@@ -21,6 +22,9 @@ Route::get('/blog/{slug}', [PostController::class, 'show'])->name('blog.show');
 // Program Sekolah
 Route::get('/program', [ProgramController::class, 'index'])->name('programs.index');
 Route::get('/program/{slug}', [ProgramController::class, 'show'])->name('programs.show');
+
+// Galeri
+Route::get('/galeri', [GalleryController::class, 'index'])->name('gallery.index');
 
 // Tenaga Pendidik
 Route::get('/guru', [TeacherController::class, 'index'])->name('teachers.index');

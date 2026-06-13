@@ -195,6 +195,7 @@
     @php
         $pubNavItems = collect(json_decode(setting('nav_items', ''), true) ?: [
             ['label' => 'Beranda',  'url' => '/',         'target' => '_self', 'is_active' => true, 'children' => []],
+            ['label' => 'Galeri',   'url' => '/galeri',   'target' => '_self', 'is_active' => true, 'children' => []],
             ['label' => 'Guru',     'url' => '/guru',     'target' => '_self', 'is_active' => true, 'children' => []],
             ['label' => 'Blog',     'url' => '/blog',     'target' => '_self', 'is_active' => true, 'children' => []],
             ['label' => 'Unduhan',  'url' => '/unduhan',  'target' => '_self', 'is_active' => true, 'children' => []],

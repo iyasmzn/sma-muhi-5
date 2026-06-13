@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Media;
 use App\Models\Post;
 use App\Models\Program;
 use App\Models\Slide;
@@ -32,6 +33,9 @@ class HomeController extends Controller
         // Alumni testimonials ("kesan & pesan") for the landing section
         $testimonials = Testimonial::published()->get();
 
+        // Gallery preview — up to 6 flagged media items for the landing section
+        $galleryMedia = Media::inGallery()->limit(6)->get();
+
         $siteName = setting('site_name', config('app.name'));
         $siteTagline = setting('site_tagline', 'Unggul, Berkarakter, Berprestasi');
 
@@ -42,6 +46,6 @@ class HomeController extends Controller
             'og_image' => setting('site_logo') ? asset('storage/'.setting('site_logo')) : null,
         ];
 
-        return view('welcome', compact('posts', 'stats', 'slides', 'programs', 'testimonials', 'seo'));
+        return view('welcome', compact('posts', 'stats', 'slides', 'programs', 'testimonials', 'galleryMedia', 'seo'));
     }
 }

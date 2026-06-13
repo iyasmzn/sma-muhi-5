@@ -5,15 +5,16 @@ namespace App\Filament\Resources\Media\Tables;
 use App\Models\Media;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
-use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -22,70 +23,22 @@ class MediaTable
 {
     public static function configure(Table $table): Table
     {
+        $size = $table->getLivewire()->cardSize ?? 'medium';
+
+        [$grid, $imageHeight] = match ($size) {
+            'small' => [['sm' => 3, 'md' => 4, 'xl' => 6, '2xl' => 8], 110],
+            'large' => [['default' => 1, 'md' => 2, 'xl' => 3], 260],
+            'list' => [['default' => 1], 0],
+            default => [['sm' => 2, 'md' => 3, 'xl' => 4, '2xl' => 5], 160],
+        };
+
+        $record = $size === 'list'
+            ? static::listLayout()
+            : static::gridLayout($imageHeight);
+
         return $table
-            ->columns([
-                Stack::make([
-                    // Thumbnail
-                    ImageColumn::make('path')
-                        ->label('')
-                        ->disk('public')
-                        ->height(160)
-                        ->width('100%')
-                        ->extraAttributes([
-                            'style' => 'width:100%;height:160px;display:block;',
-                        ])
-                        ->extraImgAttributes([
-                            'style' => 'width:100%;height:100%;object-fit:cover;display:block;',
-                        ])
-                        ->defaultImageUrl(function (Media $record): string {
-                            if ($record->is_embed) {
-                                return $record->embed_thumbnail ?? '';
-                            }
-
-                            return $record->is_image
-                                ? ''
-                                : 'data:image/svg+xml,'.rawurlencode(
-                                    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="#d97706">'
-                                    .'<rect width="80" height="80" rx="8" fill="#fffbeb"/>'
-                                    .'<text x="40" y="50" font-size="32" text-anchor="middle">📄</text>'
-                                    .'</svg>'
-                                );
-                        }),
-
-                    // Meta below thumbnail
-                    Stack::make([
-                        TextColumn::make('name')
-                            ->weight(FontWeight::SemiBold)
-                            ->size(TextSize::Small)
-                            ->limit(26)
-                            ->searchable()
-                            ->extraAttributes(['style' => 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;display:block;']),
-
-                        TextColumn::make('size_formatted')
-                            ->label('Ukuran')
-                            ->state(fn (Media $record): ?string => $record->is_embed ? null : $record->size_formatted)
-                            ->color('gray')
-                            ->size(TextSize::ExtraSmall),
-
-                        TextColumn::make('type_label')
-                            ->label('Tipe')
-                            ->state(fn (Media $record): string => $record->getTypeLabel())
-                            ->badge(fn (Media $record): bool => $record->is_embed)
-                            ->color('gray')
-                            ->size(TextSize::ExtraSmall)
-                            ->limit(30),
-                    ])
-                        ->space(1)
-                        ->extraAttributes(['class' => 'px-3 py-2.5 min-w-0 overflow-hidden']),
-                ])
-                    ->extraAttributes(['class' => 'overflow-hidden']),
-            ])
-            ->contentGrid([
-                'sm' => 2,
-                'md' => 3,
-                'xl' => 4,
-                '2xl' => 5,
-            ])
+            ->columns([$record])
+            ->contentGrid($grid)
             ->defaultSort('created_at', 'desc')
             ->paginated([12, 24, 48, 96])
             ->searchable()
@@ -111,6 +64,12 @@ class MediaTable
                                 ->where('mime_type', '!=', 'application/pdf'),
                         };
                     }),
+
+                TernaryFilter::make('show_in_gallery')
+                    ->label('Status Publikasi')
+                    ->placeholder('Semua')
+                    ->trueLabel('Dipublikasikan')
+                    ->falseLabel('Disembunyikan'),
             ])
             ->recordActions([
                 Action::make('copy_url')
@@ -127,13 +86,6 @@ class MediaTable
                         ->success()
                         ->send()
                     ),
-
-                DeleteAction::make()
-                    ->after(function (Media $record): void {
-                        if (filled($record->path)) {
-                            Storage::disk($record->disk)->delete($record->path);
-                        }
-                    }),
             ])
             ->bulkActions([
                 BulkAction::make('delete_selected')
@@ -156,5 +108,113 @@ class MediaTable
                     })
                     ->deselectRecordsAfterCompletion(),
             ]);
+    }
+
+    /**
+     * Vertical card layout (small / medium / large) — thumbnail on top, meta below.
+     */
+    private static function gridLayout(int $imageHeight): Stack
+    {
+        return Stack::make([
+            ImageColumn::make('path')
+                ->label('')
+                ->disk('public')
+                ->height($imageHeight)
+                ->width('100%')
+                ->extraAttributes(['style' => "width:100%;height:{$imageHeight}px;display:block;"])
+                ->extraImgAttributes(['style' => 'width:100%;height:100%;object-fit:cover;display:block;'])
+                ->defaultImageUrl(static::thumbnailFallback()),
+
+            Stack::make(static::metaColumns())
+                ->space(1)
+                ->extraAttributes(['class' => 'px-3 py-2.5 min-w-0 overflow-hidden']),
+        ])
+            ->extraAttributes(['class' => 'overflow-hidden']);
+    }
+
+    /**
+     * Horizontal row layout (list) — small thumbnail on the left, meta on the right.
+     */
+    private static function listLayout(): Split
+    {
+        return Split::make([
+            ImageColumn::make('path')
+                ->label('')
+                ->disk('public')
+                ->height(72)
+                ->width(72)
+                ->grow(false)
+                ->extraImgAttributes(['style' => 'width:72px;height:72px;object-fit:cover;border-radius:.5rem;display:block;'])
+                ->defaultImageUrl(static::thumbnailFallback()),
+
+            Stack::make(static::metaColumns())
+                ->space(1)
+                ->extraAttributes(['class' => 'min-w-0 overflow-hidden']),
+        ])->extraAttributes(['class' => 'items-center gap-3 px-3 py-2']);
+    }
+
+    /**
+     * Meta lines shared by every layout: name, origin badge, date + size.
+     *
+     * @return array<int, TextColumn>
+     */
+    private static function metaColumns(): array
+    {
+        return [
+            TextColumn::make('name')
+                ->weight(FontWeight::SemiBold)
+                ->size(TextSize::Small)
+                ->limit(40)
+                ->searchable()
+                ->extraAttributes(['style' => 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;display:block;']),
+
+            TextColumn::make('origin')
+                ->state(fn (Media $record): string => $record->getOriginLabel())
+                ->badge()
+                ->color('gray')
+                ->icon(Heroicon::OutlinedFolder)
+                ->size(TextSize::ExtraSmall),
+
+            TextColumn::make('created_at')
+                ->state(function (Media $record): string {
+                    $date = $record->created_at?->translatedFormat('d M Y') ?? '';
+
+                    return $record->is_embed
+                        ? $date
+                        : trim($date.' · '.$record->size_formatted, ' ·');
+                })
+                ->icon(Heroicon::OutlinedCalendar)
+                ->color('gray')
+                ->size(TextSize::ExtraSmall),
+
+            TextColumn::make('show_in_gallery')
+                ->state(fn (Media $record): string => $record->show_in_gallery ? 'Dipublikasikan' : 'Disembunyikan')
+                ->badge()
+                ->color(fn (Media $record): string => $record->show_in_gallery ? 'success' : 'gray')
+                ->icon(fn (Media $record): Heroicon => $record->show_in_gallery ? Heroicon::OutlinedEye : Heroicon::OutlinedEyeSlash)
+                ->size(TextSize::ExtraSmall),
+        ];
+    }
+
+    /**
+     * Fallback thumbnail for embeds (provider thumbnail) and non-image files
+     * (a document glyph). Images fall through to the stored file.
+     */
+    private static function thumbnailFallback(): callable
+    {
+        return function (Media $record): string {
+            if ($record->is_embed) {
+                return $record->embed_thumbnail ?? '';
+            }
+
+            return $record->is_image
+                ? ''
+                : 'data:image/svg+xml,'.rawurlencode(
+                    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="#d97706">'
+                    .'<rect width="80" height="80" rx="8" fill="#fffbeb"/>'
+                    .'<text x="40" y="50" font-size="32" text-anchor="middle">📄</text>'
+                    .'</svg>'
+                );
+        };
     }
 }

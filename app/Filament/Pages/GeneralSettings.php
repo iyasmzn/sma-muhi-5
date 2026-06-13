@@ -2,11 +2,10 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\InteractsWithImagePicker;
 use App\Models\Setting;
-use App\Services\MediaLibraryService;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -19,6 +18,8 @@ use UnitEnum;
 
 class GeneralSettings extends Page
 {
+    use InteractsWithImagePicker;
+
     protected string $view = 'filament.pages.general-settings';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
@@ -45,6 +46,7 @@ class GeneralSettings extends Page
             // Media
             'site_logo' => Setting::get('site_logo'),
             'site_favicon' => Setting::get('site_favicon'),
+            ...self::imagePickerDefaults(['site_logo', 'site_favicon']),
 
             // Kontak
             'contact_address' => Setting::get('contact_address'),
@@ -100,28 +102,23 @@ class GeneralSettings extends Page
                 ->description('Gambar yang mewakili identitas visual sekolah di browser dan halaman web.')
                 ->icon('heroicon-o-photo')
                 ->schema([
-                    Grid::make(2)->schema([
-                        FileUpload::make('site_logo')
-                            ->label('Logo Sekolah')
-                            ->image()
-                            ->disk('public')
-                            ->directory('settings')
-                            ->visibility('public')
-                            ->automaticallyResizeImagesToWidth('400')
-                            ->automaticallyResizeImagesToHeight('400')
-                            ->hint('Format PNG/SVG transparan disarankan. Maks 400×400px.'),
+                    self::imagePicker(
+                        key: 'site_logo',
+                        label: 'Logo Sekolah',
+                        hint: 'Format PNG/SVG transparan disarankan. Maks 400×400px.',
+                        accepted: ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'],
+                        width: 400,
+                        height: 400,
+                    ),
 
-                        FileUpload::make('site_favicon')
-                            ->label('Favicon')
-                            ->image()
-                            ->disk('public')
-                            ->directory('settings')
-                            ->visibility('public')
-                            ->automaticallyResizeImagesToWidth('64')
-                            ->automaticallyResizeImagesToHeight('64')
-                            ->acceptedFileTypes(['image/png', 'image/x-icon', 'image/svg+xml'])
-                            ->hint('Format ICO atau PNG 64×64px.'),
-                    ]),
+                    self::imagePicker(
+                        key: 'site_favicon',
+                        label: 'Favicon',
+                        hint: 'Format ICO atau PNG 64×64px.',
+                        accepted: ['image/png', 'image/x-icon', 'image/svg+xml'],
+                        width: 64,
+                        height: 64,
+                    ),
                 ]),
 
             Section::make('Informasi Kontak')
@@ -196,17 +193,9 @@ class GeneralSettings extends Page
 
     public function save(): void
     {
-        $data = $this->form->getState();
+        $data = self::applyImagePickers($this->form->getState(), ['site_logo', 'site_favicon']);
 
         Setting::setMany($data);
-
-        // Sync uploaded logo/favicon to the Galeri & Kegiatan Sekolah
-        $media = app(MediaLibraryService::class);
-        foreach (['site_logo', 'site_favicon'] as $key) {
-            if (! blank($data[$key] ?? null)) {
-                $media->sync($data[$key]);
-            }
-        }
 
         Notification::make()
             ->success()

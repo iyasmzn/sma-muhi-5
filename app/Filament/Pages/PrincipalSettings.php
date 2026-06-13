@@ -2,12 +2,11 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\InteractsWithImagePicker;
 use App\Models\Setting;
 use App\Models\StaticPage;
-use App\Services\MediaLibraryService;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -21,6 +20,8 @@ use UnitEnum;
 
 class PrincipalSettings extends Page
 {
+    use InteractsWithImagePicker;
+
     protected string $view = 'filament.pages.general-settings';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserCircle;
@@ -38,13 +39,19 @@ class PrincipalSettings extends Page
 
     public function mount(): void
     {
+        // Only keep the saved page if it still exists as an active static page,
+        // otherwise the Select value would fail validation on save.
+        $activePageSlugs = StaticPage::active()->pluck('slug');
+        $principalPage = Setting::get('principal_page', 'sambutan-kepala-sekolah');
+
         $this->form->fill([
             'principal_name' => Setting::get('principal_name'),
             'principal_nip' => Setting::get('principal_nip'),
             'principal_title' => Setting::get('principal_title', 'Kepala Sekolah'),
             'principal_photo' => Setting::get('principal_photo'),
             'principal_excerpt' => Setting::get('principal_excerpt'),
-            'principal_page' => Setting::get('principal_page', 'sambutan-kepala-sekolah'),
+            'principal_page' => $activePageSlugs->contains($principalPage) ? $principalPage : null,
+            ...self::imagePickerDefaults(['principal_photo']),
         ]);
     }
 
@@ -80,16 +87,15 @@ class PrincipalSettings extends Page
                         ->placeholder('Kepala Sekolah')
                         ->columnSpanFull(),
 
-                    FileUpload::make('principal_photo')
-                        ->label('Foto Kepala Sekolah')
-                        ->image()
-                        ->disk('public')
-                        ->directory('principal')
-                        ->visibility('public')
-                        ->automaticallyResizeImagesToWidth('600')
-                        ->automaticallyResizeImagesToHeight('700')
-                        ->hint('Foto formal, rasio portrait 3:4 disarankan.')
-                        ->columnSpanFull(),
+                    self::imagePicker(
+                        key: 'principal_photo',
+                        label: 'Foto Kepala Sekolah',
+                        hint: 'Foto formal, rasio portrait 3:4 disarankan.',
+                        accepted: ['image/jpeg', 'image/png', 'image/webp'],
+                        width: 600,
+                        height: 700,
+                        directory: 'principal',
+                    ),
                 ]),
 
             Section::make('Tampilan di Halaman Depan')
@@ -118,13 +124,9 @@ class PrincipalSettings extends Page
 
     public function save(): void
     {
-        $data = $this->form->getState();
+        $data = self::applyImagePickers($this->form->getState(), ['principal_photo']);
 
         Setting::setMany($data);
-
-        if (! blank($data['principal_photo'] ?? null)) {
-            app(MediaLibraryService::class)->sync($data['principal_photo']);
-        }
 
         Notification::make()
             ->success()

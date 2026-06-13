@@ -33,6 +33,16 @@ class MediaFactory extends Factory
     }
 
     /**
+     * Flagged to appear in the public gallery.
+     */
+    public function inGallery(): static
+    {
+        return $this->state(fn (): array => [
+            'show_in_gallery' => true,
+        ]);
+    }
+
+    /**
      * An external video embed (YouTube/TikTok/Instagram) with no physical file.
      */
     public function embed(string $provider = EmbedVideo::PROVIDER_YOUTUBE): static

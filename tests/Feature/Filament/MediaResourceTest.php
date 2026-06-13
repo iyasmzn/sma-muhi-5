@@ -65,6 +65,52 @@ class MediaResourceTest extends TestCase
             ->assertCanNotSeeTableRecords([$file]);
     }
 
+    public function test_publication_filter_returns_only_published_media(): void
+    {
+        $published = Media::factory()->inGallery()->create();
+        $hidden = Media::factory()->create();
+
+        Livewire::test(ListMedia::class)
+            ->filterTable('show_in_gallery', true)
+            ->assertCanSeeTableRecords([$published])
+            ->assertCanNotSeeTableRecords([$hidden]);
+    }
+
+    public function test_publication_filter_returns_only_hidden_media(): void
+    {
+        $published = Media::factory()->inGallery()->create();
+        $hidden = Media::factory()->create();
+
+        Livewire::test(ListMedia::class)
+            ->filterTable('show_in_gallery', false)
+            ->assertCanSeeTableRecords([$hidden])
+            ->assertCanNotSeeTableRecords([$published]);
+    }
+
+    public function test_table_renders_in_every_card_size(): void
+    {
+        $media = Media::factory()->count(2)->create();
+
+        foreach (['small', 'medium', 'large', 'list'] as $size) {
+            Livewire::test(ListMedia::class)
+                ->set('cardSize', $size)
+                ->assertSuccessful()
+                ->assertCanSeeTableRecords($media);
+        }
+    }
+
+    public function test_card_size_action_updates_preference_and_rerenders_table(): void
+    {
+        $media = Media::factory()->count(2)->create();
+
+        Livewire::test(ListMedia::class)
+            ->assertSet('cardSize', 'medium')
+            ->callAction('card_size_list')
+            ->assertSet('cardSize', 'list')
+            ->assertSuccessful()
+            ->assertCanSeeTableRecords($media);
+    }
+
     // ── Add embed action ──────────────────────────────────────────
 
     public function test_can_add_youtube_embed(): void
@@ -82,6 +128,25 @@ class MediaResourceTest extends TestCase
             'embed_provider' => 'youtube',
             'embed_url' => 'https://youtu.be/dQw4w9WgXcQ',
             'path' => null,
+            'show_in_gallery' => true,
+        ]);
+    }
+
+    public function test_add_embed_respects_alt_and_gallery_toggle(): void
+    {
+        Livewire::test(ListMedia::class)
+            ->callAction('add_embed', [
+                'name' => 'Video Profil',
+                'alt' => 'Cuplikan video profil sekolah',
+                'embed_url' => 'https://youtu.be/dQw4w9WgXcQ',
+                'show_in_gallery' => false,
+            ])
+            ->assertHasNoActionErrors();
+
+        $this->assertDatabaseHas(Media::class, [
+            'name' => 'Video Profil',
+            'alt' => 'Cuplikan video profil sekolah',
+            'show_in_gallery' => false,
         ]);
     }
 
@@ -125,6 +190,21 @@ class MediaResourceTest extends TestCase
         ]);
     }
 
+    public function test_can_toggle_show_in_gallery(): void
+    {
+        $file = Media::factory()->create(['show_in_gallery' => false]);
+
+        Livewire::test(EditMedia::class, ['record' => $file->id])
+            ->fillForm(['show_in_gallery' => true])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas(Media::class, [
+            'id' => $file->id,
+            'show_in_gallery' => true,
+        ]);
+    }
+
     // ── Model accessors ───────────────────────────────────────────
 
     public function test_embed_record_exposes_url_thumbnail_and_html(): void
@@ -145,5 +225,23 @@ class MediaResourceTest extends TestCase
         $this->assertFalse($file->is_embed);
         $this->assertNull($file->embed_thumbnail);
         $this->assertNull($file->embed_html);
+    }
+
+    public function test_origin_label_reflects_storage_folder(): void
+    {
+        $settings = Media::factory()->create(['path' => 'settings/logo.png']);
+        $blog = Media::factory()->create(['path' => 'posts/images/foto.jpg']);
+        $gallery = Media::factory()->create(['path' => 'media/foto.jpg']);
+
+        $this->assertSame('Pengaturan', $settings->getOriginLabel());
+        $this->assertSame('Blog', $blog->getOriginLabel());
+        $this->assertSame('Galeri', $gallery->getOriginLabel());
+    }
+
+    public function test_origin_label_for_embed_is_provider(): void
+    {
+        $embed = Media::factory()->embed('youtube')->create();
+
+        $this->assertSame('YouTube', $embed->getOriginLabel());
     }
 }

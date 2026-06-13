@@ -4,10 +4,12 @@ namespace App\Models;
 
 use App\Services\EmbedVideo;
 use Database\Factories\MediaFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 class Media extends Model
 {
@@ -25,9 +27,46 @@ class Media extends Model
         'mime_type',
         'size',
         'uploaded_by',
+        'show_in_gallery',
     ];
 
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'show_in_gallery' => 'boolean',
+        ];
+    }
+
+    // ── Scopes ────────────────────────────────────────────────────────
+
+    /**
+     * Visual media (images & video embeds) flagged to appear in the public
+     * gallery, newest first.
+     */
+    public function scopeInGallery(Builder $query): Builder
+    {
+        return $query
+            ->where('show_in_gallery', true)
+            ->where(function (Builder $q): void {
+                $q->where('mime_type', 'like', 'image/%')
+                    ->orWhereNotNull('embed_provider');
+            })
+            ->latest();
+    }
+
     // ── Accessors ─────────────────────────────────────────────────────
+
+    /**
+     * Image URL used to preview the item in the gallery — the embed thumbnail
+     * for video embeds, otherwise the stored image URL.
+     */
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        return $this->is_embed ? $this->embed_thumbnail : $this->url;
+    }
 
     /**
      * Public URL to access the item — the embed URL for embeds, otherwise the
@@ -110,6 +149,34 @@ class Media extends Model
             $this->mime_type === 'application/pdf' => 'PDF',
             str_starts_with($this->mime_type ?? '', 'video/') => 'Video',
             default => 'File',
+        };
+    }
+
+    /**
+     * Where the media originates from — the embed provider for video embeds,
+     * otherwise a human label derived from the storage folder.
+     */
+    public function getOriginLabel(): string
+    {
+        if ($this->is_embed) {
+            return EmbedVideo::label($this->embed_provider);
+        }
+
+        $segment = explode('/', (string) $this->path)[0];
+
+        return match ($segment) {
+            'media' => 'Galeri',
+            'settings' => 'Pengaturan',
+            'posts' => 'Blog',
+            'pages' => 'Halaman',
+            'slides' => 'Slide',
+            'principal' => 'Kepala Sekolah',
+            'programs' => 'Program',
+            'teachers' => 'Guru',
+            'testimonials' => 'Testimoni',
+            'downloads' => 'Unduhan',
+            'alumni-imports' => 'Alumni',
+            default => $segment !== '' ? Str::headline($segment) : 'Lainnya',
         };
     }
 

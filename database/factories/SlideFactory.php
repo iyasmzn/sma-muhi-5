@@ -18,7 +18,13 @@ class SlideFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'image' => 'slides/'.fake()->uuid().'.jpg',
+            'title' => fake()->sentence(3),
+            'subtitle' => fake()->sentence(6),
+            'button_label' => null,
+            'button_url' => null,
+            'sort_order' => 0,
+            'is_active' => true,
         ];
     }
 }
