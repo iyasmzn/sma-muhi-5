@@ -40,8 +40,12 @@ class AppServiceProvider extends ServiceProvider
         Post::observe(PostObserver::class);
 
         // ── Chart.js plugin: tampilkan angka di dalam slice pie ──────────────────────────────
-        FilamentAsset::register([
-            Js::make('chart-js-plugins', Vite::asset('resources/js/filament-chart-js-plugins.js'))->module(),
-        ]);
+        // Skip during console (e.g. `package:discover` on deploy) because Vite::asset()
+        // eagerly reads the manifest, which does not exist yet before `npm run build`.
+        if (! $this->app->runningInConsole()) {
+            FilamentAsset::register([
+                Js::make('chart-js-plugins', Vite::asset('resources/js/filament-chart-js-plugins.js'))->module(),
+            ]);
+        }
     }
 }
