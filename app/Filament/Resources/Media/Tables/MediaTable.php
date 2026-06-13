@@ -18,6 +18,8 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Js;
+use Livewire\Component;
 
 class MediaTable
 {
@@ -76,18 +78,51 @@ class MediaTable
                     ->label('Salin URL')
                     ->icon(Heroicon::OutlinedClipboard)
                     ->color('gray')
-                    ->action(function (Media $record): void {
-                        // URL is returned to the frontend via a notification containing it
-                    })
-                    ->successNotification(null)
-                    ->after(fn (Media $record) => Notification::make()
-                        ->title('URL disalin ke clipboard')
-                        ->body($record->url)
-                        ->success()
-                        ->send()
-                    ),
+                    ->action(function (Media $record, Component $livewire): void {
+                        // Filament strips event handlers from action extraAttributes, so
+                        // the copy runs through Livewire's JS bridge after the click.
+                        $url = Js::from($record->url);
+                        $livewire->js(<<<JS
+                            (() => {
+                                const v = {$url};
+                                if (navigator.clipboard && window.isSecureContext) {
+                                    navigator.clipboard.writeText(v);
+                                } else {
+                                    const t = document.createElement('textarea');
+                                    t.value = v;
+                                    t.style.position = 'fixed';
+                                    t.style.left = '-9999px';
+                                    document.body.appendChild(t);
+                                    t.focus();
+                                    t.select();
+                                    try { document.execCommand('copy'); } catch (e) {}
+                                    document.body.removeChild(t);
+                                }
+                            })()
+                        JS);
+
+                        Notification::make()
+                            ->title('URL disalin ke clipboard')
+                            ->body($record->url)
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->bulkActions([
+                BulkAction::make('publish_selected')
+                    ->label('Tampilkan di Galeri')
+                    ->icon(Heroicon::OutlinedEye)
+                    ->color('success')
+                    ->action(fn (Collection $records) => static::setGalleryVisibility($records, true))
+                    ->deselectRecordsAfterCompletion(),
+
+                BulkAction::make('unpublish_selected')
+                    ->label('Sembunyikan dari Galeri')
+                    ->icon(Heroicon::OutlinedEyeSlash)
+                    ->color('gray')
+                    ->action(fn (Collection $records) => static::setGalleryVisibility($records, false))
+                    ->deselectRecordsAfterCompletion(),
+
                 BulkAction::make('delete_selected')
                     ->label('Hapus Terpilih')
                     ->icon(Heroicon::OutlinedTrash)
@@ -108,6 +143,21 @@ class MediaTable
                     })
                     ->deselectRecordsAfterCompletion(),
             ]);
+    }
+
+    /**
+     * Toggle the gallery (published) visibility for the selected media.
+     *
+     * @param  Collection<int, Media>  $records
+     */
+    private static function setGalleryVisibility(Collection $records, bool $visible): void
+    {
+        Media::query()->whereKey($records->modelKeys())->update(['show_in_gallery' => $visible]);
+
+        Notification::make()
+            ->success()
+            ->title($visible ? 'Media ditampilkan di galeri' : 'Media disembunyikan dari galeri')
+            ->send();
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Filament\Resources\Media\Pages\EditMedia;
 use App\Filament\Resources\Media\Pages\ListMedia;
 use App\Models\Media;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -85,6 +86,40 @@ class MediaResourceTest extends TestCase
             ->filterTable('show_in_gallery', false)
             ->assertCanSeeTableRecords([$hidden])
             ->assertCanNotSeeTableRecords([$published]);
+    }
+
+    public function test_copy_url_action_runs_and_notifies(): void
+    {
+        $media = Media::factory()->create(['path' => 'media/contoh.png', 'mime_type' => 'image/png']);
+
+        Livewire::test(ListMedia::class)
+            ->callAction(TestAction::make('copy_url')->table($media))
+            ->assertHasNoActionErrors()
+            ->assertNotified();
+    }
+
+    public function test_bulk_publish_sets_show_in_gallery_true(): void
+    {
+        $records = Media::factory()->count(2)->create(['show_in_gallery' => false]);
+
+        Livewire::test(ListMedia::class)
+            ->callTableBulkAction('publish_selected', $records);
+
+        foreach ($records as $record) {
+            $this->assertTrue($record->refresh()->show_in_gallery);
+        }
+    }
+
+    public function test_bulk_unpublish_sets_show_in_gallery_false(): void
+    {
+        $records = Media::factory()->count(2)->inGallery()->create();
+
+        Livewire::test(ListMedia::class)
+            ->callTableBulkAction('unpublish_selected', $records);
+
+        foreach ($records as $record) {
+            $this->assertFalse($record->refresh()->show_in_gallery);
+        }
     }
 
     public function test_table_renders_in_every_card_size(): void
