@@ -67,6 +67,16 @@ class MediaTable
                         };
                     }),
 
+                SelectFilter::make('origin')
+                    ->label('Folder Asal')
+                    ->options(fn (): array => Media::originOptions())
+                    ->query(function ($query, array $data): void {
+                        if (blank($data['value'])) {
+                            return;
+                        }
+                        $query->fromOrigin($data['value']);
+                    }),
+
                 TernaryFilter::make('show_in_gallery')
                     ->label('Status Publikasi')
                     ->placeholder('Semua')

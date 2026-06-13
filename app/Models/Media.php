@@ -16,6 +16,31 @@ class Media extends Model
     /** @use HasFactory<MediaFactory> */
     use HasFactory;
 
+    /**
+     * Storage folder (first path segment) → human label for the feature that
+     * produced the media. Shared by the origin badge and the origin filter.
+     *
+     * @var array<string, string>
+     */
+    /**
+     * Filter sentinel selecting video embeds (which have no storage folder).
+     */
+    public const ORIGIN_EMBED = 'embed';
+
+    public const ORIGIN_LABELS = [
+        'media' => 'Galeri',
+        'settings' => 'Pengaturan',
+        'posts' => 'Blog',
+        'pages' => 'Halaman',
+        'slides' => 'Slide',
+        'principal' => 'Kepala Sekolah',
+        'programs' => 'Program',
+        'teachers' => 'Guru',
+        'testimonials' => 'Testimoni',
+        'downloads' => 'Unduhan',
+        'alumni-imports' => 'Alumni',
+    ];
+
     protected $fillable = [
         'name',
         'alt',
@@ -55,6 +80,50 @@ class Media extends Model
                     ->orWhereNotNull('embed_provider');
             })
             ->latest();
+    }
+
+    /**
+     * Restrict to media originating from a given folder segment (e.g. "teachers"),
+     * or to video embeds when given the "embed" sentinel.
+     */
+    public function scopeFromOrigin(Builder $query, string $origin): Builder
+    {
+        if ($origin === self::ORIGIN_EMBED) {
+            return $query->whereNotNull('embed_provider');
+        }
+
+        return $query
+            ->whereNull('embed_provider')
+            ->where('path', 'like', addcslashes($origin, '%_\\').'/%');
+    }
+
+    /**
+     * Origin filter options — folder labels (plus "Video Embed") limited to the
+     * origins actually present in the library, keyed by the value
+     * {@see scopeFromOrigin()} expects.
+     *
+     * @return array<string, string>
+     */
+    public static function originOptions(): array
+    {
+        $options = static::query()
+            ->whereNull('embed_provider')
+            ->whereNotNull('path')
+            ->pluck('path')
+            ->map(fn (string $path): string => explode('/', $path)[0])
+            ->filter()
+            ->unique()
+            ->mapWithKeys(fn (string $segment): array => [
+                $segment => self::ORIGIN_LABELS[$segment] ?? Str::headline($segment),
+            ])
+            ->sort()
+            ->all();
+
+        if (static::query()->whereNotNull('embed_provider')->exists()) {
+            $options[self::ORIGIN_EMBED] = 'Video Embed';
+        }
+
+        return $options;
     }
 
     // ── Accessors ─────────────────────────────────────────────────────
@@ -162,22 +231,17 @@ class Media extends Model
             return EmbedVideo::label($this->embed_provider);
         }
 
-        $segment = explode('/', (string) $this->path)[0];
+        $segment = $this->getOriginSegment();
 
-        return match ($segment) {
-            'media' => 'Galeri',
-            'settings' => 'Pengaturan',
-            'posts' => 'Blog',
-            'pages' => 'Halaman',
-            'slides' => 'Slide',
-            'principal' => 'Kepala Sekolah',
-            'programs' => 'Program',
-            'teachers' => 'Guru',
-            'testimonials' => 'Testimoni',
-            'downloads' => 'Unduhan',
-            'alumni-imports' => 'Alumni',
-            default => $segment !== '' ? Str::headline($segment) : 'Lainnya',
-        };
+        return self::ORIGIN_LABELS[$segment] ?? ($segment !== '' ? Str::headline($segment) : 'Lainnya');
+    }
+
+    /**
+     * The storage folder (first path segment) the file lives in, e.g. "teachers".
+     */
+    public function getOriginSegment(): string
+    {
+        return explode('/', (string) $this->path)[0];
     }
 
     // ── Relationships ─────────────────────────────────────────────────

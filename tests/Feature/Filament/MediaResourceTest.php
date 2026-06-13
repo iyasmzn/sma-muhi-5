@@ -66,6 +66,43 @@ class MediaResourceTest extends TestCase
             ->assertCanNotSeeTableRecords([$file]);
     }
 
+    public function test_origin_filter_returns_only_media_from_that_folder(): void
+    {
+        $teacher = Media::factory()->create(['path' => 'teachers/budi.jpg']);
+        $slide = Media::factory()->create(['path' => 'slides/banner.jpg']);
+
+        Livewire::test(ListMedia::class)
+            ->filterTable('origin', 'teachers')
+            ->assertCanSeeTableRecords([$teacher])
+            ->assertCanNotSeeTableRecords([$slide]);
+    }
+
+    public function test_origin_filter_can_select_video_embeds(): void
+    {
+        $embed = Media::factory()->embed()->create();
+        $file = Media::factory()->create(['path' => 'teachers/budi.jpg']);
+
+        Livewire::test(ListMedia::class)
+            ->filterTable('origin', 'embed')
+            ->assertCanSeeTableRecords([$embed])
+            ->assertCanNotSeeTableRecords([$file]);
+    }
+
+    public function test_origin_options_list_only_present_origins_with_labels(): void
+    {
+        Media::factory()->create(['path' => 'teachers/budi.jpg']);
+        Media::factory()->create(['path' => 'settings/logo.png']);
+        Media::factory()->embed()->create();
+
+        $options = Media::originOptions();
+
+        $this->assertSame('Guru', $options['teachers']);
+        $this->assertSame('Pengaturan', $options['settings']);
+        $this->assertSame('Video Embed', $options['embed']);
+        // Folders with no media are not offered.
+        $this->assertArrayNotHasKey('programs', $options);
+    }
+
     public function test_publication_filter_returns_only_published_media(): void
     {
         $published = Media::factory()->inGallery()->create();

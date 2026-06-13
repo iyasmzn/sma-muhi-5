@@ -52,6 +52,11 @@ class ListMedia extends ListRecords
             });
     }
 
+    public function getSubheading(): ?string
+    {
+        return 'Kelola foto, dokumen, dan video kegiatan sekolah. Aktifkan "Tampil di Galeri" agar media muncul di section & halaman Galeri publik.';
+    }
+
     protected function getHeaderActions(): array
     {
         return [
