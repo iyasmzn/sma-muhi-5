@@ -29,7 +29,7 @@ class NavbarSettings extends Page
 
     protected static ?string $title = 'Pengaturan Menu Navigasi';
 
-    protected static ?int $navigationSort = 11;
+    protected static ?int $navigationSort = 2;
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];

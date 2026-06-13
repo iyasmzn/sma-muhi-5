@@ -28,7 +28,7 @@ class QuickLinksSettings extends Page
 
     protected static ?string $title = 'Pengaturan Tautan Cepat';
 
-    protected static ?int $navigationSort = 14;
+    protected static ?int $navigationSort = 5;
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];

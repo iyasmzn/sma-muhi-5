@@ -25,6 +25,8 @@ class DownloadResource extends Resource
 
     protected static ?string $navigationLabel = 'Unduhan';
 
+    protected static ?int $navigationSort = 7;
+
     protected static ?string $modelLabel = 'Unduhan';
 
     protected static ?string $pluralModelLabel = 'Unduhan';

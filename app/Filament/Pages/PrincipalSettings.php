@@ -32,7 +32,7 @@ class PrincipalSettings extends Page
 
     protected static ?string $title = 'Pengaturan Seksi Kepala Sekolah';
 
-    protected static ?int $navigationSort = 13;
+    protected static ?int $navigationSort = 4;
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];

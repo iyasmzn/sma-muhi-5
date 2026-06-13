@@ -28,7 +28,7 @@ class ThemeSettings extends Page
 
     protected static ?string $title = 'Pengaturan Tema & Tampilan';
 
-    protected static ?int $navigationSort = 16;
+    protected static ?int $navigationSort = 6;
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];

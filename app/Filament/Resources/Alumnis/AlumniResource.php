@@ -25,6 +25,8 @@ class AlumniResource extends Resource
 
     protected static ?string $navigationLabel = 'Pendataan Alumni';
 
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $modelLabel = 'Alumni';
 
     protected static ?string $pluralModelLabel = 'Alumni';

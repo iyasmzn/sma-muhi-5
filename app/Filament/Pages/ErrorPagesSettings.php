@@ -26,7 +26,7 @@ class ErrorPagesSettings extends Page
 
     protected static ?string $title = 'Halaman Error';
 
-    protected static ?int $navigationSort = 17;
+    protected static ?int $navigationSort = 7;
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];

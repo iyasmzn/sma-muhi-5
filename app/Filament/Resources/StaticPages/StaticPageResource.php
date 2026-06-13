@@ -25,6 +25,8 @@ class StaticPageResource extends Resource
 
     protected static ?string $navigationLabel = 'Halaman Statis';
 
+    protected static ?int $navigationSort = 6;
+
     protected static ?string $modelLabel = 'Halaman Statis';
 
     protected static ?string $pluralModelLabel = 'Halaman Statis';

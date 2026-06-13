@@ -28,7 +28,7 @@ class MediaResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Galeri & Kegiatan Sekolah';
 
-    protected static ?int $navigationSort = 0;
+    protected static ?int $navigationSort = 5;
 
     public static function form(Schema $schema): Schema
     {

@@ -27,7 +27,7 @@ class LandingPageSettings extends Page
 
     protected static ?string $title = 'Pengaturan Halaman Depan';
 
-    protected static ?int $navigationSort = 12;
+    protected static ?int $navigationSort = 3;
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];

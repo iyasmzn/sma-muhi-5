@@ -30,7 +30,7 @@ class GeneralSettings extends Page
 
     protected static ?string $title = 'Pengaturan Umum';
 
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 1;
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];
