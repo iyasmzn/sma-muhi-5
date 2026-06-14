@@ -24,7 +24,7 @@
     $footerHasContact = setting('contact_address') || setting('contact_phone') || setting('contact_email') || setting('contact_hours');
 @endphp
 
-<footer id="kontak" class="mt-20" style="background:#1d1d1f">
+<footer id="kontak" style="background:#1d1d1f">
     <div class="amber-bar"></div>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
 
