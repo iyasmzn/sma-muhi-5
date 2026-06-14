@@ -461,46 +461,7 @@
     </main>
 
     {{-- ── Footer ───────────────────────────────────────────── --}}
-    <footer class="mt-20" style="background:#1d1d1f">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-
-            {{-- Top row --}}
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-10 pb-10 border-b border-white/10">
-                <div class="flex items-center gap-3">
-                    @if(setting('site_logo'))
-                        <img src="{{ asset('storage/' . setting('site_logo')) }}"
-                             alt="{{ setting('site_name', config('app.name')) }}"
-                             class="w-10 h-10 rounded-2xl object-contain">
-                    @else
-                        <div class="w-10 h-10 rounded-2xl flex items-center justify-center shadow"
-                             style="background:var(--primary)">
-                            <span class="text-white font-extrabold">{{ strtoupper(substr(setting('site_name', config('app.name', 'S')), 0, 1)) }}</span>
-                        </div>
-                    @endif
-                    <div>
-                        <div class="font-bold text-white text-sm">{{ setting('site_name', config('app.name')) }}</div>
-                        <div class="text-[10px] text-amber-500 font-semibold uppercase tracking-widest mt-0.5">{{ setting('site_tagline', 'Unggul · Berkarakter') }}</div>
-                    </div>
-                </div>
-                <nav class="flex flex-wrap gap-x-6 gap-y-2">
-                    @foreach($pubNavItems as $item)
-                        <a href="{{ $item['url'] }}" target="{{ $item['target'] ?? '_self' }}"
-                           class="text-sm text-white/50 hover:text-white transition-colors">{{ $item['label'] }}</a>
-                    @endforeach
-                </nav>
-            </div>
-
-            {{-- Bottom row --}}
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
-                <p class="text-xs text-white/30">© {{ date('Y') }} {{ setting('site_name', config('app.name')) }}. Semua hak dilindungi.</p>
-                <div class="flex gap-5">
-                    @foreach(['Kebijakan Privasi', 'Syarat & Ketentuan'] as $l)
-                        <a href="#" class="text-xs text-white/30 hover:text-white/60 transition-colors">{{ $l }}</a>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </footer>
+    @include('sections.footer')
 
     <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
     <script>AOS.init({ once: true, duration: 700, easing: 'ease-out-quart', offset: 60 });</script>
