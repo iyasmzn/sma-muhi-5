@@ -26,6 +26,23 @@
     .profile-photo-wrap {
         position: relative;
         overflow: hidden;
+        aspect-ratio: 4 / 5;
+        background: #0f172a;
+    }
+    .profile-photo-wrap img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 25%;
+    }
+    @media (min-width: 768px) {
+        /* On desktop the grid stretches the column to the info side,
+           so let the absolute image fill it instead of forcing a ratio. */
+        .profile-photo-wrap {
+            aspect-ratio: auto;
+        }
     }
     .profile-photo-wrap::after {
         content: '';
@@ -87,7 +104,7 @@
     {{-- ── Hero band — dark backing for the transparent header ──── --}}
     <section class="-mt-17 pt-26 pb-8 sm:pt-30 sm:pb-10"
              style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 40%,#0c1a0f 100%)">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <nav aria-label="Breadcrumb" class="flex items-center gap-1.5 text-xs text-white/50">
                 <a href="/" class="hover:text-white transition-colors">Beranda</a>
                 <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
@@ -98,7 +115,7 @@
         </div>
     </section>
 
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
         {{-- ── Main Card ────────────────────────────────────── --}}
         <div class="fi-card overflow-hidden" data-aos="fade-up" itemscope itemtype="https://schema.org/Person">
@@ -106,12 +123,10 @@
             <div class="grid md:grid-cols-5 gap-0">
 
                 {{-- ── Left: Photo ──────────────────────────── --}}
-                <div class="md:col-span-2 profile-photo-wrap" style="min-height:360px">
+                <div class="md:col-span-2 profile-photo-wrap">
                     <img src="{{ $teacher->photo_url }}"
                          alt="{{ $teacher->name }}"
                          loading="eager"
-                         class="w-full h-full object-cover"
-                         style="max-height:560px"
                          itemprop="image">
 
                     {{-- Info overlay at bottom (mobile) --}}
