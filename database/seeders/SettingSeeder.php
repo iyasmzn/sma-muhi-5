@@ -121,9 +121,6 @@ class SettingSeeder extends Seeder
             'quick_links' => json_encode([
                 ['icon' => '📋', 'label' => 'SPMB',    'url' => '#spmb',    'is_active' => true],
                 ['icon' => '📥', 'label' => 'Unduhan', 'url' => '/unduhan', 'is_active' => true],
-                ['icon' => '📅', 'label' => 'Jadwal',  'url' => '#jadwal',  'is_active' => true],
-                ['icon' => '🏆', 'label' => 'Prestasi', 'url' => '#prestasi', 'is_active' => true],
-                ['icon' => '👥', 'label' => 'Alumni',  'url' => '#alumni',  'is_active' => true],
                 ['icon' => '📞', 'label' => 'Kontak',  'url' => '#kontak',  'is_active' => true],
             ]),
         ];
