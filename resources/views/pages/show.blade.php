@@ -387,7 +387,8 @@
                                             @endforeach
                                         </div>
 
-                                        {{-- Lightbox --}}
+                                        {{-- Lightbox (teleported to body to escape AOS transform + card overflow) --}}
+                                        <template x-teleport="body">
                                         <div x-show="lightbox"
                                              x-transition:enter="transition ease-out duration-200"
                                              x-transition:enter-start="opacity-0"
@@ -410,6 +411,7 @@
                                             <p x-show="currentAlt" x-text="currentAlt"
                                                class="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/70 text-sm bg-black/40 backdrop-blur-sm rounded-full px-4 py-1.5 max-w-sm text-center"></p>
                                         </div>
+                                        </template>
                                     </div>
                                 @endif
                             @endif

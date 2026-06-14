@@ -150,7 +150,8 @@
                             @endforeach
                         </div>
 
-                        {{-- Lightbox --}}
+                        {{-- Lightbox (teleported to body to escape AOS transform + card overflow) --}}
+                        <template x-teleport="body">
                         <div x-show="open" x-cloak
                              x-transition.opacity
                              @keydown.escape.window="open = false"
@@ -164,6 +165,7 @@
                             <img :src="active" @click.stop alt="{{ $program->title }}"
                                  class="max-w-full max-h-[85vh] rounded-lg object-contain shadow-2xl">
                         </div>
+                        </template>
                     </div>
                 @endif
 
