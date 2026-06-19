@@ -3,6 +3,24 @@
     Explains how to obtain a valid, supported URL for each provider so the
     embed validator (App\Services\EmbedVideo) accepts it.
 --}}
+{{-- Theme-aware styling for the example URL chips: a fixed light background
+     left the text unreadable in dark mode, so colours are set per theme. --}}
+<style>
+    .fi-embed-help-url {
+        display: block;
+        padding: .25rem .5rem;
+        border-radius: .375rem;
+        word-break: break-all;
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .dark .fi-embed-help-url {
+        background: rgba(255, 255, 255, .07);
+        color: #e5e7eb;
+    }
+</style>
+
 <div style="display:flex;flex-direction:column;gap:1.25rem;font-size:.875rem;line-height:1.5;">
 
     <p style="color:var(--gray-500);">
@@ -22,9 +40,9 @@
             <li>Mendukung video biasa, <strong>Shorts</strong>, dan <strong>Live</strong>.</li>
         </ol>
         <div style="margin-top:.6rem;display:flex;flex-direction:column;gap:.3rem;">
-            <code style="background:var(--gray-100);padding:.25rem .5rem;border-radius:.375rem;word-break:break-all;">https://www.youtube.com/watch?v=XXXXXXXXXXX</code>
-            <code style="background:var(--gray-100);padding:.25rem .5rem;border-radius:.375rem;word-break:break-all;">https://youtu.be/XXXXXXXXXXX</code>
-            <code style="background:var(--gray-100);padding:.25rem .5rem;border-radius:.375rem;word-break:break-all;">https://www.youtube.com/shorts/XXXXXXXXXXX</code>
+            <code class="fi-embed-help-url">https://www.youtube.com/watch?v=XXXXXXXXXXX</code>
+            <code class="fi-embed-help-url">https://youtu.be/XXXXXXXXXXX</code>
+            <code class="fi-embed-help-url">https://www.youtube.com/shorts/XXXXXXXXXXX</code>
         </div>
     </div>
 
@@ -44,7 +62,7 @@
             <li>Di komputer: cukup salin link dari address bar saat menonton video.</li>
         </ol>
         <div style="margin-top:.6rem;">
-            <code style="background:var(--gray-100);padding:.25rem .5rem;border-radius:.375rem;word-break:break-all;">https://www.tiktok.com/@nama_akun/video/1234567890123456789</code>
+            <code class="fi-embed-help-url">https://www.tiktok.com/@nama_akun/video/1234567890123456789</code>
         </div>
     </div>
 
@@ -60,8 +78,8 @@
             <li>Link <strong>profil</strong> atau <strong>story</strong> tidak bisa di-embed — harus link ke satu postingan.</li>
         </ol>
         <div style="margin-top:.6rem;display:flex;flex-direction:column;gap:.3rem;">
-            <code style="background:var(--gray-100);padding:.25rem .5rem;border-radius:.375rem;word-break:break-all;">https://www.instagram.com/reel/XXXXXXXXXXX/</code>
-            <code style="background:var(--gray-100);padding:.25rem .5rem;border-radius:.375rem;word-break:break-all;">https://www.instagram.com/p/XXXXXXXXXXX/</code>
+            <code class="fi-embed-help-url">https://www.instagram.com/reel/XXXXXXXXXXX/</code>
+            <code class="fi-embed-help-url">https://www.instagram.com/p/XXXXXXXXXXX/</code>
         </div>
     </div>
 
