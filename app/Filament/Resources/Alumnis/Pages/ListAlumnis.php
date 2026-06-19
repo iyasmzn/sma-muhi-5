@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Alumnis\Pages;
 
 use App\Filament\Resources\Alumnis\AlumniResource;
+use App\Services\AlumniImportResult;
 use App\Services\AlumniImportService;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -11,11 +12,18 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ListAlumnis extends ListRecords
 {
     protected static string $resource = AlumniResource::class;
+
+    /**
+     * Maximum number of failed-row messages listed in the failure notification
+     * before the remainder is summarized as a count.
+     */
+    private const MAX_ERRORS_SHOWN = 10;
 
     protected function getHeaderActions(): array
     {
@@ -56,20 +64,49 @@ class ListAlumnis extends ListRecords
                     $disk->delete($path);
                 }
 
-                $notification = Notification::make()
-                    ->title('Import selesai')
-                    ->body($result->summary());
-
-                if ($result->hasErrors()) {
-                    $notification
-                        ->warning()
-                        ->body($result->summary().' '.count($result->errors).' baris bermasalah: '.implode(' ', array_slice($result->errors, 0, 5)));
-                } else {
-                    $notification->success();
-                }
-
-                $notification->send();
+                $this->notifyImportResult($result);
             });
+    }
+
+    private function notifyImportResult(AlumniImportResult $result): void
+    {
+        if ($result->total() === 0) {
+            Notification::make()
+                ->title('Tidak ada data')
+                ->body('File tidak berisi baris data untuk diimpor.')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        if (! $result->hasErrors()) {
+            Notification::make()
+                ->title('Import berhasil')
+                ->body("Semua {$result->processed()} baris berhasil diimpor ({$result->created} ditambahkan, {$result->updated} diperbarui).")
+                ->success()
+                ->send();
+
+            return;
+        }
+
+        $shown = array_slice($result->errors, 0, self::MAX_ERRORS_SHOWN);
+        $lines = array_map(fn (string $error): string => e($error), $shown);
+
+        if ($result->failed() > count($shown)) {
+            $lines[] = '…dan '.($result->failed() - count($shown)).' baris lainnya.';
+        }
+
+        $intro = $result->processed() > 0
+            ? "{$result->processed()} baris berhasil, {$result->failed()} baris gagal:"
+            : "{$result->failed()} baris gagal diimpor:";
+
+        Notification::make()
+            ->title($result->processed() > 0 ? 'Sebagian baris gagal diimpor' : 'Import gagal')
+            ->body(new HtmlString($intro.'<br>'.implode('<br>', $lines)))
+            ->danger()
+            ->persistent()
+            ->send();
     }
 
     private function templateAction(): Action

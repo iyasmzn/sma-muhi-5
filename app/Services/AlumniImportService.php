@@ -151,7 +151,7 @@ class AlumniImportService
         $attributes = $this->extractAttributes($values, $columnMap);
 
         if (blank($attributes['full_name'] ?? null)) {
-            $result->skipped++;
+            $result->errors[] = "Baris {$rowNumber}: kolom Nama Lengkap wajib diisi.";
 
             return;
         }

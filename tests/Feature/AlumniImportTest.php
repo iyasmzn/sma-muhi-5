@@ -100,7 +100,7 @@ class AlumniImportTest extends TestCase
         $this->assertTrue($citra->entered_ptn);
     }
 
-    public function test_skips_rows_without_a_name(): void
+    public function test_reports_rows_without_a_name_as_failed(): void
     {
         $path = $this->makeXlsx([
             $this->header(),
@@ -110,8 +110,45 @@ class AlumniImportTest extends TestCase
         $result = $this->service->import($path);
 
         $this->assertSame(0, $result->created);
-        $this->assertSame(1, $result->skipped);
+        $this->assertSame(1, $result->failed());
+        $this->assertTrue($result->hasErrors());
+        $this->assertStringContainsString('Nama Lengkap', $result->errors[0]);
         $this->assertSame(0, Alumni::count());
+    }
+
+    public function test_imports_valid_rows_and_reports_invalid_ones(): void
+    {
+        $path = $this->makeXlsx([
+            $this->header(),
+            ['Orang Valid', '', '', '', '', '', 'IPA', 2022, 'IJ-A', '', '', '', '', '', 'Tidak', ''],
+            ['Tahun Salah', '', '', '', '', '', 'IPS', 3000, 'IJ-B', '', '', '', '', '', 'Tidak', ''],
+        ]);
+
+        $result = $this->service->import($path);
+
+        $this->assertSame(1, $result->created);
+        $this->assertSame(1, $result->failed());
+        $this->assertTrue($result->hasErrors());
+        $this->assertStringContainsString('Baris 3', $result->errors[0]);
+
+        $this->assertDatabaseHas(Alumni::class, ['certificate_number' => 'IJ-A']);
+        $this->assertDatabaseMissing(Alumni::class, ['certificate_number' => 'IJ-B']);
+    }
+
+    public function test_successful_import_has_no_errors(): void
+    {
+        $path = $this->makeXlsx([
+            $this->header(),
+            ['Orang Satu', '', '', '', '', '', 'IPA', 2022, 'IJ-X', '', '', '', '', '', 'Ya', 'ITB'],
+            ['Orang Dua', '', '', '', '', '', 'IPS', 2023, 'IJ-Y', '', '', '', '', '', 'Tidak', ''],
+        ]);
+
+        $result = $this->service->import($path);
+
+        $this->assertSame(2, $result->created);
+        $this->assertSame(2, $result->processed());
+        $this->assertSame(0, $result->failed());
+        $this->assertFalse($result->hasErrors());
     }
 
     public function test_updates_existing_record_matched_by_certificate_number(): void
