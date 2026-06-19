@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\Setting;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -86,6 +87,20 @@ class QuickLinksSettings extends Page
                                     ->inline(false)
                                     ->columnSpan(2),
                             ]),
+
+                            FileUpload::make('icon_image')
+                                ->label('Gambar Ikon')
+                                ->image()
+                                ->disk('public')
+                                ->directory('quick-links')
+                                ->visibility('public')
+                                ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml', 'image/x-icon', 'image/vnd.microsoft.icon'])
+                                ->mimeTypeMap([
+                                    'ico' => 'image/x-icon',
+                                ])
+                                ->maxSize(1024)
+                                ->helperText('Opsional. Jika diisi, gambar dipakai sebagai ikon menggantikan emoji. Mendukung PNG, SVG, WebP, JPG, dan ICO. Disarankan persegi & transparan.')
+                                ->columnSpanFull(),
                         ])
                         ->addActionLabel('+ Tambah Tautan')
                         ->reorderable()

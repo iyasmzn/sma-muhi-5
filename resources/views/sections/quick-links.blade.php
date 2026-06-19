@@ -52,7 +52,14 @@
                     <span class="absolute inset-x-0 top-0 h-1 scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
                           style="background:linear-gradient(90deg, var(--primary), var(--color-amber-300))"></span>
 
-                    @if(!empty($item['icon']))
+                    @if(!empty($item['icon_image']))
+                        <span class="flex items-center justify-center w-12 h-12 rounded-2xl overflow-hidden shrink-0 p-1.5 transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-0.5"
+                              style="background:var(--bg-alt); border:1px solid var(--border)">
+                            <img src="{{ \Illuminate\Support\Str::startsWith($item['icon_image'], ['http://', 'https://', '/']) ? $item['icon_image'] : asset('storage/'.$item['icon_image']) }}"
+                                 alt="{{ $item['label'] }}" loading="lazy"
+                                 class="w-full h-full object-contain">
+                        </span>
+                    @elseif(!empty($item['icon']))
                         <span class="flex items-center justify-center w-12 h-12 rounded-2xl text-2xl leading-none shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-0.5"
                               style="{{ $palette[$loop->index % count($palette)] }}">
                             {{ $item['icon'] }}
