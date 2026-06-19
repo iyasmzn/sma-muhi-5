@@ -117,6 +117,13 @@
             --color-amber-900: color-mix(in oklab, var(--primary) 42%, black);
         }
 
+        /* Cegah overflow horizontal di mobile (whitespace geser kanan).
+           Pakai `clip`, bukan `hidden`, agar tidak merusak sticky header
+           & scroll-smooth pada anchor. */
+        html, body {
+            overflow-x: clip;
+        }
+
         body {
             background: var(--bg);
             color: var(--text);
