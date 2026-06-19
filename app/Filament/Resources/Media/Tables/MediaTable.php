@@ -118,7 +118,12 @@ class MediaTable
                             ->send();
                     }),
             ])
-            ->bulkActions([
+            // Card-size selector + bulk actions share the toolbar (left of search
+            // & filters). They must live in a single toolbarActions() call —
+            // the deprecated bulkActions() would overwrite anything set before it.
+            ->toolbarActions([
+                $table->getLivewire()->cardSizeActionGroup(),
+
                 BulkAction::make('publish_selected')
                     ->label('Tampilkan di Galeri')
                     ->icon(Heroicon::OutlinedEye)

@@ -177,7 +177,7 @@ class MediaResourceTest extends TestCase
 
         Livewire::test(ListMedia::class)
             ->assertSet('cardSize', 'medium')
-            ->callAction('card_size_list')
+            ->callAction(TestAction::make('card_size_list')->table())
             ->assertSet('cardSize', 'list')
             ->assertSuccessful()
             ->assertCanSeeTableRecords($media);
@@ -220,6 +220,24 @@ class MediaResourceTest extends TestCase
             'alt' => 'Cuplikan video profil sekolah',
             'show_in_gallery' => false,
         ]);
+    }
+
+    public function test_embed_help_action_is_available(): void
+    {
+        Livewire::test(ListMedia::class)
+            ->assertActionExists('embed_help');
+    }
+
+    public function test_embed_help_view_explains_each_provider(): void
+    {
+        $html = view('filament.media.embed-help')->render();
+
+        $this->assertStringContainsString('YouTube', $html);
+        $this->assertStringContainsString('TikTok', $html);
+        $this->assertStringContainsString('Instagram', $html);
+        $this->assertStringContainsString('youtu.be', $html);
+        $this->assertStringContainsString('tiktok.com/@', $html);
+        $this->assertStringContainsString('instagram.com/reel', $html);
     }
 
     public function test_add_embed_rejects_unsupported_url(): void

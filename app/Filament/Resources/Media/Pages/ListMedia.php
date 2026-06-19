@@ -19,6 +19,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
@@ -57,20 +58,27 @@ class ListMedia extends ListRecords
         return 'Kelola foto, dokumen, dan video kegiatan sekolah. Aktifkan "Tampil di Galeri" agar media muncul di section & halaman Galeri publik.';
     }
 
+    /**
+     * Card-size selector, rendered in the table header so it sits with the
+     * table's own controls instead of among the page actions.
+     */
+    public function cardSizeActionGroup(): ActionGroup
+    {
+        return ActionGroup::make([
+            $this->cardSizeAction('small', 'Kecil', Heroicon::OutlinedSquares2x2),
+            $this->cardSizeAction('medium', 'Sedang', Heroicon::OutlinedViewColumns),
+            $this->cardSizeAction('large', 'Besar', Heroicon::OutlinedSquare2Stack),
+            $this->cardSizeAction('list', 'Daftar', Heroicon::OutlinedListBullet),
+        ])
+            ->label('Ukuran Kartu')
+            ->icon(Heroicon::OutlinedViewfinderCircle)
+            ->button()
+            ->color('gray');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
-            ActionGroup::make([
-                $this->cardSizeAction('small', 'Kecil', Heroicon::OutlinedSquares2x2),
-                $this->cardSizeAction('medium', 'Sedang', Heroicon::OutlinedViewColumns),
-                $this->cardSizeAction('large', 'Besar', Heroicon::OutlinedSquare2Stack),
-                $this->cardSizeAction('list', 'Daftar', Heroicon::OutlinedListBullet),
-            ])
-                ->label('Ukuran Kartu')
-                ->icon(Heroicon::OutlinedViewfinderCircle)
-                ->button()
-                ->color('gray'),
-
             Action::make('upload')
                 ->label('Upload File')
                 ->icon(Heroicon::OutlinedArrowUpTray)
@@ -261,6 +269,19 @@ class ListMedia extends ListRecords
                         ->title('Embed video ditambahkan')
                         ->send();
                 }),
+
+            Action::make('embed_help')
+                ->label('Cara Embed Video')
+                ->tooltip('Cara Embed Video')
+                ->icon(Heroicon::OutlinedQuestionMarkCircle)
+                ->color('gray')
+                ->iconButton()
+                ->modalHeading('Cara Embed Video YouTube, TikTok & Instagram')
+                ->modalIcon(Heroicon::OutlinedVideoCamera)
+                ->modalContent(fn (): View => view('filament.media.embed-help'))
+                ->modalSubmitAction(false)
+                ->modalCancelActionLabel('Tutup')
+                ->modalWidth('2xl'),
         ];
     }
 }
