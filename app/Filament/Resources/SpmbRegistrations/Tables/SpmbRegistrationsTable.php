@@ -3,13 +3,20 @@
 namespace App\Filament\Resources\SpmbRegistrations\Tables;
 
 use App\Models\AcademicYear;
+use App\Models\RegistrationWave;
 use App\Models\SpmbRegistration;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\Indicator;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class SpmbRegistrationsTable
 {
@@ -71,16 +78,52 @@ class SpmbRegistrationsTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                SelectFilter::make('academic_year_id')
-                    ->label('Tahun Ajaran')
-                    ->relationship('academicYear', 'year_start')
-                    ->getOptionLabelFromRecordUsing(fn (AcademicYear $record): string => $record->label)
-                    ->native(false),
+                Filter::make('periode')
+                    ->label('Tahun Ajaran & Gelombang')
+                    ->schema([
+                        Select::make('academic_year_id')
+                            ->label('Tahun Ajaran')
+                            ->options(fn (): array => AcademicYear::query()
+                                ->orderByDesc('is_active')
+                                ->orderByDesc('year_start')
+                                ->get()
+                                ->mapWithKeys(fn (AcademicYear $year): array => [
+                                    $year->id => $year->label.($year->is_active ? ' (Aktif)' : ''),
+                                ])
+                                ->all())
+                            ->native(false)
+                            ->live()
+                            ->afterStateUpdated(fn (Set $set) => $set('registration_wave_id', null)),
 
-                SelectFilter::make('registration_wave_id')
-                    ->label('Gelombang')
-                    ->relationship('registrationWave', 'name')
-                    ->native(false),
+                        Select::make('registration_wave_id')
+                            ->label('Gelombang')
+                            ->options(fn (Get $get): array => blank($get('academic_year_id'))
+                                ? []
+                                : RegistrationWave::query()
+                                    ->where('academic_year_id', $get('academic_year_id'))
+                                    ->orderBy('start_date')
+                                    ->pluck('name', 'id')
+                                    ->all())
+                            ->native(false)
+                            ->disabled(fn (Get $get): bool => blank($get('academic_year_id')))
+                            ->placeholder('Pilih tahun ajaran dahulu'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when($data['academic_year_id'] ?? null, fn (Builder $q, $id) => $q->where('academic_year_id', $id))
+                        ->when($data['registration_wave_id'] ?? null, fn (Builder $q, $id) => $q->where('registration_wave_id', $id)))
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+
+                        if ($year = AcademicYear::find($data['academic_year_id'] ?? null)) {
+                            $indicators[] = Indicator::make("T.A. {$year->label}")->removeField('academic_year_id');
+                        }
+
+                        if ($wave = RegistrationWave::find($data['registration_wave_id'] ?? null)) {
+                            $indicators[] = Indicator::make("Gelombang: {$wave->name}")->removeField('registration_wave_id');
+                        }
+
+                        return $indicators;
+                    }),
 
                 SelectFilter::make('admission_path_id')
                     ->label('Jalur')
