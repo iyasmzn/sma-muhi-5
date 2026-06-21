@@ -86,6 +86,7 @@
         'src'  => $m->is_embed ? null : $m->url,
         'html' => $m->is_embed ? (string) $m->embed_html : null,
         'vertical' => in_array($m->embed_provider, ['tiktok', 'instagram'], true),
+        'ratio' => $m->is_embed ? round(\App\Services\EmbedVideo::aspectRatio($m->embed_provider), 4) : null,
     ])->values();
 @endphp
 
@@ -213,7 +214,7 @@
                 </template>
                 <template x-if="current && current.type === 'video'">
                     <div class="mx-auto rounded-xl overflow-hidden shadow-2xl"
-                         :style="current.vertical ? 'max-width:min(64vh, 90vw)' : ''"
+                         :style="current.vertical ? `width: min(calc(80vh * ${current.ratio}), 90vw)` : ''"
                          x-html="current.html"></div>
                 </template>
                 <p class="text-center text-white/80 text-sm mt-4 font-medium" x-text="current ? current.name : ''"></p>

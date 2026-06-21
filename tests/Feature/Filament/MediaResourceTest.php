@@ -8,6 +8,9 @@ use App\Models\Media;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
@@ -266,6 +269,9 @@ class MediaResourceTest extends TestCase
 
     public function test_editing_embed_url_resyncs_provider(): void
     {
+        // Editing to a TikTok URL triggers a thumbnail fetch; stub it out.
+        Http::fake();
+
         $embed = Media::factory()->embed('youtube')->create();
 
         Livewire::test(EditMedia::class, ['record' => $embed->id])
@@ -306,6 +312,61 @@ class MediaResourceTest extends TestCase
         $this->assertSame('YouTube', $embed->getTypeLabel());
         $this->assertStringContainsString('img.youtube.com', $embed->embed_thumbnail);
         $this->assertStringContainsString('<iframe', (string) $embed->embed_html);
+    }
+
+    public function test_embed_thumbnail_prefers_uploaded_image_over_provider_default(): void
+    {
+        $withUpload = Media::factory()->embed('tiktok')
+            ->withEmbedThumbnail('media/embed-thumbnails/tiktok.jpg')
+            ->create();
+        $withoutUpload = Media::factory()->embed('tiktok')->create();
+
+        // The uploaded image wins, and it is what the gallery renders too.
+        $this->assertStringContainsString('storage/media/embed-thumbnails/tiktok.jpg', $withUpload->embed_thumbnail);
+        $this->assertSame($withUpload->embed_thumbnail, $withUpload->thumbnail_url);
+
+        // Without an upload, TikTok falls back to the inline badge (no real thumbnail).
+        $this->assertStringStartsWith('data:image/svg+xml', $withoutUpload->embed_thumbnail);
+    }
+
+    public function test_add_tiktok_embed_auto_fetches_thumbnail(): void
+    {
+        Storage::fake('public');
+        Http::fake([
+            'www.tiktok.com/oembed*' => Http::response(['thumbnail_url' => 'https://cdn.tiktokcdn.test/thumb.jpg'], 200),
+            'cdn.tiktokcdn.test/*' => Http::response('FAKE_IMAGE_BYTES', 200, ['Content-Type' => 'image/jpeg']),
+        ]);
+
+        Livewire::test(ListMedia::class)
+            ->callAction('add_embed', [
+                'name' => 'TikTok Kegiatan',
+                'embed_url' => 'https://www.tiktok.com/@scout/video/7012345678901234567',
+            ])
+            ->assertHasNoActionErrors();
+
+        $media = Media::where('name', 'TikTok Kegiatan')->firstOrFail();
+
+        $this->assertNotNull($media->embed_thumbnail_path);
+        Storage::disk('public')->assertExists($media->embed_thumbnail_path);
+    }
+
+    public function test_add_embed_stores_manual_thumbnail(): void
+    {
+        Storage::fake('public');
+        $thumbnail = UploadedFile::fake()->create('thumb.jpg', 10, 'image/png');
+
+        Livewire::test(ListMedia::class)
+            ->callAction('add_embed', [
+                'name' => 'Reel Kegiatan',
+                'embed_url' => 'https://www.instagram.com/reel/CabcdefghIj/',
+                'embed_thumbnail_path' => [$thumbnail],
+            ])
+            ->assertHasNoActionErrors();
+
+        $media = Media::where('name', 'Reel Kegiatan')->firstOrFail();
+
+        $this->assertNotNull($media->embed_thumbnail_path);
+        Storage::disk('public')->assertExists($media->embed_thumbnail_path);
     }
 
     public function test_file_record_is_not_embed(): void

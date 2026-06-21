@@ -61,4 +61,14 @@ class MediaFactory extends Factory
             'embed_url' => $urls[$provider],
         ]);
     }
+
+    /**
+     * Attach a manually uploaded preview image to an embed.
+     */
+    public function withEmbedThumbnail(string $path = 'media/embed-thumbnails/thumb.jpg'): static
+    {
+        return $this->state(fn (): array => [
+            'embed_thumbnail_path' => $path,
+        ]);
+    }
 }

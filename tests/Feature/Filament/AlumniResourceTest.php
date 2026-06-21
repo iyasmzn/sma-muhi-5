@@ -175,6 +175,58 @@ class AlumniResourceTest extends TestCase
         ]);
     }
 
+    // ── Import results modal & history link ───────────────────────
+
+    public function test_list_page_has_history_link(): void
+    {
+        Livewire::test(ListAlumnis::class)
+            ->assertSuccessful()
+            ->assertSee('Riwayat Import');
+    }
+
+    public function test_import_result_modal_previews_imported_and_failed_rows(): void
+    {
+        $entry = [
+            'id' => 'x',
+            'imported_at' => now()->toIso8601String(),
+            'filename' => 'data-alumni.xlsx',
+            'created' => 1,
+            'updated' => 0,
+            'failed' => 1,
+            'total' => 2,
+            'imported' => [
+                ['row' => 2, 'action' => 'created', 'attributes' => ['full_name' => 'Andi Wijaya', 'certificate_number' => 'IJ-1']],
+            ],
+            'failures' => [
+                ['row' => 3, 'reason' => 'Kolom Nama Lengkap wajib diisi.', 'attributes' => ['full_name' => null]],
+            ],
+        ];
+
+        Livewire::test(ListAlumnis::class)
+            ->set('lastImport', $entry)
+            ->mountAction('importResult')
+            ->assertActionMounted('importResult');
+    }
+
+    public function test_import_detail_partial_previews_imported_and_failed_rows(): void
+    {
+        $html = view('filament.alumni.import-detail', ['entry' => [
+            'created' => 1,
+            'updated' => 0,
+            'failed' => 1,
+            'imported' => [
+                ['row' => 2, 'action' => 'created', 'attributes' => ['full_name' => 'Andi Wijaya', 'certificate_number' => 'IJ-1']],
+            ],
+            'failures' => [
+                ['row' => 3, 'reason' => 'Kolom Nama Lengkap wajib diisi.', 'attributes' => ['full_name' => null]],
+            ],
+        ]])->render();
+
+        $this->assertStringContainsString('Data Berhasil Masuk', $html);
+        $this->assertStringContainsString('Andi Wijaya', $html);
+        $this->assertStringContainsString('Kolom Nama Lengkap wajib diisi.', $html);
+    }
+
     // ── Model ─────────────────────────────────────────────────────
 
     public function test_entered_ptn_scope_returns_only_ptn_alumni(): void

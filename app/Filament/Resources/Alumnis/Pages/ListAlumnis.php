@@ -2,17 +2,19 @@
 
 namespace App\Filament\Resources\Alumnis\Pages;
 
+use App\Filament\Pages\AlumniImportHistoryPage;
 use App\Filament\Resources\Alumnis\AlumniResource;
-use App\Services\AlumniImportResult;
+use App\Services\AlumniImportHistory;
 use App\Services\AlumniImportService;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\HtmlString;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ListAlumnis extends ListRecords
@@ -20,17 +22,23 @@ class ListAlumnis extends ListRecords
     protected static string $resource = AlumniResource::class;
 
     /**
-     * Maximum number of failed-row messages listed in the failure notification
-     * before the remainder is summarized as a count.
+     * The most recent import run (history entry), used to populate the
+     * results preview modal shown right after an import completes.
+     *
+     * @var array<string, mixed>|null
      */
-    private const MAX_ERRORS_SHOWN = 10;
+    public ?array $lastImport = null;
 
     protected function getHeaderActions(): array
     {
         return [
+            $this->historyAction(),
             $this->templateAction(),
             $this->importAction(),
             CreateAction::make(),
+            // Only after an import: lets the user reopen the results preview; it is
+            // also mounted programmatically right after the import completes.
+            $this->importResultAction(),
         ];
     }
 
@@ -52,7 +60,8 @@ class ListAlumnis extends ListRecords
                     ])
                     ->disk('local')
                     ->directory('alumni-imports')
-                    ->storeFiles(),
+                    ->storeFiles()
+                    ->storeFileNamesIn('original_filename'),
             ])
             ->action(function (array $data): void {
                 $disk = Storage::disk('local');
@@ -64,49 +73,84 @@ class ListAlumnis extends ListRecords
                     $disk->delete($path);
                 }
 
-                $this->notifyImportResult($result);
+                if ($result->total() === 0) {
+                    Notification::make()
+                        ->title('Tidak ada data')
+                        ->body('File tidak berisi baris data untuk diimpor.')
+                        ->warning()
+                        ->send();
+
+                    return;
+                }
+
+                $filename = is_string($data['original_filename'] ?? null)
+                    ? $data['original_filename']
+                    : basename((string) $path);
+
+                $this->lastImport = app(AlumniImportHistory::class)->record($result, $filename);
+
+                // Swap the upload modal for a results preview without closing it.
+                $this->replaceMountedAction('importResult');
             });
     }
 
-    private function notifyImportResult(AlumniImportResult $result): void
+    private function importResultAction(): Action
     {
-        if ($result->total() === 0) {
-            Notification::make()
-                ->title('Tidak ada data')
-                ->body('File tidak berisi baris data untuk diimpor.')
-                ->warning()
-                ->send();
+        return Action::make('importResult')
+            ->label('Hasil Import Terakhir')
+            ->icon(Heroicon::OutlinedDocumentArrowUp)
+            ->color('gray')
+            ->visible(fn (): bool => filled($this->lastImport))
+            ->modalHeading(fn (): string => $this->importResultHeading())
+            ->modalDescription('Rincian perubahan dari import terakhir. Catatan ini juga tersimpan di halaman Riwayat Import.')
+            ->modalIcon(Heroicon::OutlinedDocumentArrowUp)
+            ->modalIconColor($this->importResultColor())
+            ->modalWidth(Width::FiveExtraLarge)
+            ->modalContent(fn (): ?View => filled($this->lastImport)
+                ? view('filament.alumni.import-detail', ['entry' => $this->lastImport])
+                : null)
+            ->modalSubmitAction(false)
+            ->modalCancelActionLabel('Tutup')
+            ->extraModalFooterActions([
+                Action::make('openHistory')
+                    ->label('Buka Riwayat Import')
+                    ->icon(Heroicon::OutlinedClock)
+                    ->color('gray')
+                    ->url(AlumniImportHistoryPage::getUrl()),
+            ]);
+    }
 
-            return;
-        }
+    private function historyAction(): Action
+    {
+        return Action::make('history')
+            ->label('Riwayat Import')
+            ->icon(Heroicon::OutlinedClock)
+            ->color('gray')
+            ->url(AlumniImportHistoryPage::getUrl());
+    }
 
-        if (! $result->hasErrors()) {
-            Notification::make()
-                ->title('Import berhasil')
-                ->body("Semua {$result->processed()} baris berhasil diimpor ({$result->created} ditambahkan, {$result->updated} diperbarui).")
-                ->success()
-                ->send();
+    private function importResultHeading(): string
+    {
+        $failed = (int) ($this->lastImport['failed'] ?? 0);
+        $total = (int) ($this->lastImport['total'] ?? 0);
 
-            return;
-        }
+        return match (true) {
+            $failed === 0 => 'Import Berhasil',
+            $failed === $total => 'Import Gagal',
+            default => 'Import Selesai — Sebagian Gagal',
+        };
+    }
 
-        $shown = array_slice($result->errors, 0, self::MAX_ERRORS_SHOWN);
-        $lines = array_map(fn (string $error): string => e($error), $shown);
+    private function importResultColor(): string
+    {
+        $failed = (int) ($this->lastImport['failed'] ?? 0);
+        $total = (int) ($this->lastImport['total'] ?? 0);
 
-        if ($result->failed() > count($shown)) {
-            $lines[] = '…dan '.($result->failed() - count($shown)).' baris lainnya.';
-        }
-
-        $intro = $result->processed() > 0
-            ? "{$result->processed()} baris berhasil, {$result->failed()} baris gagal:"
-            : "{$result->failed()} baris gagal diimpor:";
-
-        Notification::make()
-            ->title($result->processed() > 0 ? 'Sebagian baris gagal diimpor' : 'Import gagal')
-            ->body(new HtmlString($intro.'<br>'.implode('<br>', $lines)))
-            ->danger()
-            ->persistent()
-            ->send();
+        return match (true) {
+            $failed === 0 => 'success',
+            $failed === $total => 'danger',
+            default => 'warning',
+        };
     }
 
     private function templateAction(): Action

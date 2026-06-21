@@ -48,6 +48,7 @@ class Media extends Model
         'path',
         'embed_provider',
         'embed_url',
+        'embed_thumbnail_path',
         'disk',
         'mime_type',
         'size',
@@ -159,12 +160,18 @@ class Media extends Model
     }
 
     /**
-     * Thumbnail/preview image URL for the item.
+     * Thumbnail/preview image URL for the item — a manually uploaded image when
+     * present (the only option for TikTok/Instagram), otherwise the provider's
+     * own thumbnail (a real image for YouTube, a branded badge for the rest).
      */
     public function getEmbedThumbnailAttribute(): ?string
     {
         if (! $this->is_embed) {
             return null;
+        }
+
+        if (filled($this->embed_thumbnail_path)) {
+            return asset('storage/'.$this->embed_thumbnail_path);
         }
 
         return EmbedVideo::thumbnail($this->embed_provider, $this->embed_url ?? '');

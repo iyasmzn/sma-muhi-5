@@ -93,13 +93,23 @@ class MediaForm
                             );
                         })
                         ->columnSpanFull(),
+
+                    FileUpload::make('embed_thumbnail_path')
+                        ->label('Thumbnail Manual')
+                        ->image()
+                        ->disk('public')
+                        ->directory('media/embed-thumbnails')
+                        ->visibility('public')
+                        ->maxSize(5120)
+                        ->helperText('Opsional. YouTube & TikTok otomatis mengambil thumbnail. Unggah gambar untuk Instagram, atau bila ingin mengganti thumbnail otomatis.')
+                        ->columnSpanFull(),
                 ]),
 
             Section::make('Tampilan Publik')
                 ->description('Atur agar media ini ditampilkan pada galeri di halaman depan.')
                 ->icon('heroicon-o-photo')
                 ->schema([
-                    
+
                     Toggle::make('show_in_gallery')
                         ->label('Tampil di Galeri')
                         ->helperText('Aktifkan untuk menampilkan gambar atau video ini di section & halaman Galeri.')

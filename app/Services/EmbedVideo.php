@@ -113,6 +113,20 @@ class EmbedVideo
     }
 
     /**
+     * Width-to-height ratio of the embedded player, used to size the responsive
+     * iframe so the provider's content fills it without letterboxing — TikTok is
+     * a 9:16 vertical video, Instagram a portrait card, YouTube 16:9.
+     */
+    public static function aspectRatio(?string $provider): float
+    {
+        return match ($provider) {
+            self::PROVIDER_TIKTOK => 9 / 16,
+            self::PROVIDER_INSTAGRAM => 4 / 5,
+            default => 16 / 9,
+        };
+    }
+
+    /**
      * A ready-to-use responsive iframe for rendering on the frontend.
      */
     public static function iframeHtml(string $provider, string $url, ?string $title = null): ?HtmlString
@@ -124,10 +138,10 @@ class EmbedVideo
         }
 
         $title = e($title ?? self::label($provider));
-        $ratio = $provider === self::PROVIDER_YOUTUBE ? '56.25%' : '125%';
+        $paddingTop = round(100 / self::aspectRatio($provider), 2).'%';
 
         return new HtmlString(
-            '<div style="position:relative;width:100%;padding-top:'.$ratio.';overflow:hidden">'
+            '<div style="position:relative;width:100%;padding-top:'.$paddingTop.';overflow:hidden">'
             .'<iframe src="'.e($src).'" title="'.$title.'" loading="lazy" frameborder="0" '
             .'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" '
             .'allowfullscreen style="position:absolute;inset:0;width:100%;height:100%"></iframe>'

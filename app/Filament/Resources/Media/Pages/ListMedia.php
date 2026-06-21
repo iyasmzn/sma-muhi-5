@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Media\Pages;
 
 use App\Filament\Resources\Media\MediaResource;
 use App\Models\Media;
+use App\Services\EmbedThumbnailService;
 use App\Services\EmbedVideo;
 use App\Services\MediaLibraryService;
 use Closure;
@@ -235,6 +236,15 @@ class ListMedia extends ListRecords
                             );
                         }),
 
+                    FileUpload::make('embed_thumbnail_path')
+                        ->label('Thumbnail Manual')
+                        ->image()
+                        ->disk('public')
+                        ->directory('media/embed-thumbnails')
+                        ->visibility('public')
+                        ->maxSize(5120)
+                        ->helperText('Opsional. YouTube & TikTok otomatis mengambil thumbnail. Unggah gambar untuk Instagram, atau bila ingin mengganti thumbnail otomatis.'),
+
                     Textarea::make('description')
                         ->label('Deskripsi')
                         ->rows(2)
@@ -252,13 +262,22 @@ class ListMedia extends ListRecords
                 ->modalWidth('xl')
                 ->action(function (array $data): void {
                     $url = trim($data['embed_url']);
+                    $provider = EmbedVideo::detectProvider($url);
+
+                    // Auto-fetch the provider thumbnail (TikTok) unless one was uploaded.
+                    $thumbnailPath = $data['embed_thumbnail_path'] ?? null;
+
+                    if (blank($thumbnailPath)) {
+                        $thumbnailPath = app(EmbedThumbnailService::class)->fetchAndStore($provider, $url);
+                    }
 
                     Media::create([
                         'name' => $data['name'],
                         'alt' => $data['alt'] ?? null,
                         'description' => $data['description'] ?? null,
-                        'embed_provider' => EmbedVideo::detectProvider($url),
+                        'embed_provider' => $provider,
                         'embed_url' => $url,
+                        'embed_thumbnail_path' => $thumbnailPath,
                         'disk' => 'public',
                         'show_in_gallery' => $data['show_in_gallery'] ?? true,
                         'uploaded_by' => Auth::id(),

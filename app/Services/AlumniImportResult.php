@@ -5,12 +5,14 @@ namespace App\Services;
 class AlumniImportResult
 {
     /**
-     * @param  list<string>  $errors  Human-readable, row-scoped failure messages (one per failed row).
+     * @param  list<array{row: int, action: string, attributes: array<string, mixed>}>  $imported  Rows that were saved.
+     * @param  list<array{row: int, reason: string, attributes: array<string, mixed>}>  $failures  Rows that could not be saved.
      */
     public function __construct(
         public int $created = 0,
         public int $updated = 0,
-        public array $errors = [],
+        public array $imported = [],
+        public array $failures = [],
     ) {}
 
     public function processed(): int
@@ -20,7 +22,7 @@ class AlumniImportResult
 
     public function failed(): int
     {
-        return count($this->errors);
+        return count($this->failures);
     }
 
     public function total(): int
@@ -30,6 +32,19 @@ class AlumniImportResult
 
     public function hasErrors(): bool
     {
-        return $this->errors !== [];
+        return $this->failures !== [];
+    }
+
+    /**
+     * Row-scoped failure messages, one per failed row.
+     *
+     * @return list<string>
+     */
+    public function errorMessages(): array
+    {
+        return array_map(
+            fn (array $failure): string => "Baris {$failure['row']}: {$failure['reason']}",
+            $this->failures,
+        );
     }
 }

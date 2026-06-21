@@ -85,4 +85,22 @@ class EmbedVideoTest extends TestCase
         $this->assertNull(EmbedVideo::iframeHtml('youtube', 'https://www.youtube.com/@somechannel'));
         $this->assertStringContainsString('<iframe', (string) EmbedVideo::iframeHtml('youtube', 'https://youtu.be/dQw4w9WgXcQ'));
     }
+
+    public function test_aspect_ratio_is_provider_specific(): void
+    {
+        $this->assertEqualsWithDelta(9 / 16, EmbedVideo::aspectRatio('tiktok'), 0.0001);
+        $this->assertEqualsWithDelta(4 / 5, EmbedVideo::aspectRatio('instagram'), 0.0001);
+        $this->assertEqualsWithDelta(16 / 9, EmbedVideo::aspectRatio('youtube'), 0.0001);
+        $this->assertEqualsWithDelta(16 / 9, EmbedVideo::aspectRatio(null), 0.0001);
+    }
+
+    public function test_iframe_uses_vertical_ratio_for_tiktok(): void
+    {
+        // TikTok is 9:16 — a wider box would letterbox the video with white sides.
+        $tiktok = (string) EmbedVideo::iframeHtml('tiktok', 'https://www.tiktok.com/@scout/video/7012345678901234567');
+        $this->assertStringContainsString('padding-top:177.78%', $tiktok);
+
+        $youtube = (string) EmbedVideo::iframeHtml('youtube', 'https://youtu.be/dQw4w9WgXcQ');
+        $this->assertStringContainsString('padding-top:56.25%', $youtube);
+    }
 }

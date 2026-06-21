@@ -112,7 +112,8 @@ class AlumniImportTest extends TestCase
         $this->assertSame(0, $result->created);
         $this->assertSame(1, $result->failed());
         $this->assertTrue($result->hasErrors());
-        $this->assertStringContainsString('Nama Lengkap', $result->errors[0]);
+        $this->assertStringContainsString('Nama Lengkap', $result->failures[0]['reason']);
+        $this->assertStringContainsString('Nama Lengkap', $result->errorMessages()[0]);
         $this->assertSame(0, Alumni::count());
     }
 
@@ -129,7 +130,10 @@ class AlumniImportTest extends TestCase
         $this->assertSame(1, $result->created);
         $this->assertSame(1, $result->failed());
         $this->assertTrue($result->hasErrors());
-        $this->assertStringContainsString('Baris 3', $result->errors[0]);
+        $this->assertStringContainsString('Baris 3', $result->errorMessages()[0]);
+        $this->assertSame('Tahun Salah', $result->failures[0]['attributes']['full_name']);
+        $this->assertSame('Orang Valid', $result->imported[0]['attributes']['full_name']);
+        $this->assertSame('created', $result->imported[0]['action']);
 
         $this->assertDatabaseHas(Alumni::class, ['certificate_number' => 'IJ-A']);
         $this->assertDatabaseMissing(Alumni::class, ['certificate_number' => 'IJ-B']);
@@ -149,6 +153,7 @@ class AlumniImportTest extends TestCase
         $this->assertSame(2, $result->processed());
         $this->assertSame(0, $result->failed());
         $this->assertFalse($result->hasErrors());
+        $this->assertCount(2, $result->imported);
     }
 
     public function test_updates_existing_record_matched_by_certificate_number(): void

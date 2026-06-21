@@ -148,6 +148,9 @@ class MediaTable
                             if (filled($record->path)) {
                                 Storage::disk($record->disk)->delete($record->path);
                             }
+                            if (filled($record->embed_thumbnail_path)) {
+                                Storage::disk($record->disk)->delete($record->embed_thumbnail_path);
+                            }
                             $record->delete();
                         }
 

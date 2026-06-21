@@ -151,7 +151,7 @@ class AlumniImportService
         $attributes = $this->extractAttributes($values, $columnMap);
 
         if (blank($attributes['full_name'] ?? null)) {
-            $result->errors[] = "Baris {$rowNumber}: kolom Nama Lengkap wajib diisi.";
+            $this->recordFailure($result, $rowNumber, 'Kolom Nama Lengkap wajib diisi.', $attributes);
 
             return;
         }
@@ -163,7 +163,7 @@ class AlumniImportService
         ]);
 
         if ($validator->fails()) {
-            $result->errors[] = "Baris {$rowNumber}: ".implode(' ', $validator->errors()->all());
+            $this->recordFailure($result, $rowNumber, implode(' ', $validator->errors()->all()), $attributes);
 
             return;
         }
@@ -178,15 +178,25 @@ class AlumniImportService
             if ($existing !== null) {
                 $existing->fill($attributes)->save();
                 $result->updated++;
+                $result->imported[] = ['row' => $rowNumber, 'action' => 'updated', 'attributes' => $attributes];
 
                 return;
             }
 
             Alumni::create($attributes);
             $result->created++;
+            $result->imported[] = ['row' => $rowNumber, 'action' => 'created', 'attributes' => $attributes];
         } catch (Throwable $e) {
-            $result->errors[] = "Baris {$rowNumber}: gagal disimpan ({$e->getMessage()}).";
+            $this->recordFailure($result, $rowNumber, "Gagal disimpan ({$e->getMessage()}).", $attributes);
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    private function recordFailure(AlumniImportResult $result, int $rowNumber, string $reason, array $attributes): void
+    {
+        $result->failures[] = ['row' => $rowNumber, 'reason' => $reason, 'attributes' => $attributes];
     }
 
     /**
