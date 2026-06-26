@@ -85,6 +85,8 @@
         'name' => $m->name,
         'src'  => $m->is_embed ? null : $m->url,
         'html' => $m->is_embed ? (string) $m->embed_html : null,
+        'provider' => $m->is_embed ? $m->embed_provider : null,
+        'embedSrc' => $m->is_embed ? \App\Services\EmbedVideo::embedSrc($m->embed_provider, $m->embed_url ?? '') : null,
         'vertical' => in_array($m->embed_provider, ['tiktok', 'instagram'], true),
         'ratio' => $m->is_embed ? round(\App\Services\EmbedVideo::aspectRatio($m->embed_provider), 4) : null,
     ])->values();
@@ -123,6 +125,14 @@
             show(i) { this.active = i; this.open = true; document.body.style.overflow = 'hidden'; },
             close() { this.open = false; this.active = null; document.body.style.overflow = ''; },
             get current() { return this.active !== null ? this.items[this.active] : null; },
+            igMeasure(event, iframe) {
+                if (! iframe || event.source !== iframe.contentWindow) { return; }
+                let data = event.data;
+                try { data = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return; }
+                if (data && data.type === 'MEASURE' && data.details && data.details.height) {
+                    iframe.style.height = Math.min(data.details.height, window.innerHeight * 0.85) + 'px';
+                }
+            },
          }"
          @keydown.escape.window="close()">
 
@@ -212,7 +222,14 @@
                     <img :src="current.src" :alt="current.name"
                          class="max-h-[80vh] w-auto mx-auto rounded-xl shadow-2xl object-contain">
                 </template>
-                <template x-if="current && current.type === 'video'">
+                <template x-if="current && current.type === 'video' && current.provider === 'instagram'">
+                    <iframe :src="current.embedSrc" scrolling="no" loading="lazy"
+                            class="block mx-auto rounded-xl shadow-2xl bg-white border-0"
+                            style="width: min(540px, 92vw); height: 70vh;"
+                            @load="$el.style.height = '70vh'"
+                            @message.window="igMeasure($event, $el)"></iframe>
+                </template>
+                <template x-if="current && current.type === 'video' && current.provider !== 'instagram'">
                     <div class="mx-auto rounded-xl overflow-hidden shadow-2xl"
                          :style="current.vertical ? `width: min(calc(80vh * ${current.ratio}), 90vw)` : ''"
                          x-html="current.html"></div>
