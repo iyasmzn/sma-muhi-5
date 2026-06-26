@@ -47,5 +47,10 @@ class AppServiceProvider extends ServiceProvider
                 Js::make('chart-js-plugins', Vite::asset('resources/js/filament-chart-js-plugins.js'))->module(),
             ]);
         }
+
+        // Force HTTPS only when the application is running in production
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
     }
 }
