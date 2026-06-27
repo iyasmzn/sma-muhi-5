@@ -125,14 +125,6 @@
             show(i) { this.active = i; this.open = true; document.body.style.overflow = 'hidden'; },
             close() { this.open = false; this.active = null; document.body.style.overflow = ''; },
             get current() { return this.active !== null ? this.items[this.active] : null; },
-            igMeasure(event, iframe) {
-                if (! iframe || event.source !== iframe.contentWindow) { return; }
-                let data = event.data;
-                try { data = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return; }
-                if (data && data.type === 'MEASURE' && data.details && data.details.height) {
-                    iframe.style.height = Math.min(data.details.height, window.innerHeight * 0.85) + 'px';
-                }
-            },
          }"
          @keydown.escape.window="close()">
 
@@ -222,17 +214,63 @@
                     <img :src="current.src" :alt="current.name"
                          class="max-h-[80vh] w-auto mx-auto rounded-xl shadow-2xl object-contain">
                 </template>
-                <template x-if="current && current.type === 'video' && current.provider === 'instagram'">
-                    <iframe :src="current.embedSrc" scrolling="no" loading="lazy"
-                            class="block mx-auto rounded-xl shadow-2xl bg-white border-0"
-                            style="width: min(540px, 92vw); height: 70vh;"
-                            @load="$el.style.height = '70vh'"
-                            @message.window="igMeasure($event, $el)"></iframe>
-                </template>
-                <template x-if="current && current.type === 'video' && current.provider !== 'instagram'">
-                    <div class="mx-auto rounded-xl overflow-hidden shadow-2xl"
-                         :style="current.vertical ? `width: min(calc(80vh * ${current.ratio}), 90vw)` : ''"
-                         x-html="current.html"></div>
+                <template x-if="current && current.type === 'video'">
+                    <div class="relative mx-auto rounded-xl overflow-hidden shadow-2xl bg-gray-900"
+                         :style="current.provider === 'instagram' ? 'width: min(540px, 92vw)' : (current.vertical ? `width: min(calc(80vh * ${current.ratio}), 90vw)` : '')"
+                         x-effect="current.embedSrc; current.html; loading = true"
+                         x-data="{
+                            loading: true,
+                            offline: ! navigator.onLine,
+                            failed: false,
+                            init() {
+                                const sync = () => { this.offline = ! navigator.onLine; if (! this.offline && this.loading) { this.reload(); } };
+                                window.addEventListener('online', sync);
+                                window.addEventListener('offline', sync);
+                                this.$nextTick(() => {
+                                    const frame = this.$root.querySelector('iframe');
+                                    if (frame) { frame.addEventListener('load', () => { this.loading = false; this.failed = false; }); }
+                                    setTimeout(() => { if (this.loading && ! this.offline) { this.failed = true; } }, 20000);
+                                });
+                            },
+                            reload() {
+                                this.failed = false; this.loading = true;
+                                const frame = this.$root.querySelector('iframe');
+                                if (frame) { frame.src = frame.src; }
+                            },
+                         }">
+                        <template x-if="current.provider === 'instagram'">
+                            <iframe :src="current.embedSrc" scrolling="auto" loading="lazy"
+                                    class="block w-full bg-white border-0" style="height: min(640px, 80vh);"
+                                    @load="loading = false"></iframe>
+                        </template>
+                        <template x-if="current.provider !== 'instagram'">
+                            <div x-html="current.html"></div>
+                        </template>
+
+                        {{-- Loading spinner --}}
+                        <div x-show="loading && ! offline && ! failed" x-transition.opacity
+                             class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gray-900/85 text-white/80">
+                            <svg class="w-9 h-9 animate-spin text-amber-400" viewBox="0 0 24 24" fill="none">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            <span class="text-xs font-medium">Memuat…</span>
+                        </div>
+
+                        {{-- Offline / failed warning --}}
+                        <div x-show="offline || failed" x-transition.opacity
+                             class="absolute inset-0 flex flex-col items-center justify-center gap-2.5 px-6 text-center bg-gray-900/90 text-white/85">
+                            <svg class="w-10 h-10 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636L5.636 18.364M8.111 8.111A6 6 0 0112 7c1.657 0 3.157.672 4.243 1.757M5.636 11.05A9.96 9.96 0 0112 8m6.364 3.05A9.96 9.96 0 0012 8m-3 6a3 3 0 016 0M12 18h.01" />
+                            </svg>
+                            <p class="text-sm font-semibold" x-text="offline ? 'Tidak ada koneksi internet' : 'Gagal memuat konten'"></p>
+                            <p class="text-xs text-white/55" x-text="offline ? 'Periksa koneksimu, lalu coba lagi.' : 'Periksa koneksi atau muat ulang konten.'"></p>
+                            <button type="button" @click="reload()"
+                                    class="mt-1 inline-flex items-center gap-1.5 rounded-full bg-white/10 hover:bg-white/20 px-4 py-1.5 text-xs font-semibold text-white transition-colors">
+                                Coba lagi
+                            </button>
+                        </div>
+                    </div>
                 </template>
                 <p class="text-center text-white/80 text-sm mt-4 font-medium" x-text="current ? current.name : ''"></p>
             </div>
