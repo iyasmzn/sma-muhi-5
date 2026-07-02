@@ -207,10 +207,6 @@
                         </div>
                     @endif
 
-                    <a href="{{ route('ppdb.index') }}" class="btn-primary w-full justify-center text-xs">
-                        Daftar Sekarang
-                    </a>
-
                     <a href="{{ route('programs.index') }}" class="btn-outline w-full justify-center text-xs group">
                         <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                         Semua Program
